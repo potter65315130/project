@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "health-mate-65199",
+          "appId": "1:122142967510:android:ea40845d44b4e02708eb77",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "health-mate-65199",
+          "configurations": {
+            "android": "1:122142967510:android:ea40845d44b4e02708eb77",
+            "ios": "1:122142967510:ios:46b65f16790cfee408eb77",
+            "macos": "1:122142967510:ios:46b65f16790cfee408eb77",
+            "web": "1:122142967510:web:5a766b97beb876bb08eb77",
+            "windows": "1:122142967510:web:f4e13a23e741adc308eb77"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": []
+    }
+  ]
+}
