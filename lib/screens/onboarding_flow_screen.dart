@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_mate/models/user_model.dart';
 import 'package:health_mate/services/firestore_service.dart';
 import 'package:intl/intl.dart';
-import 'package:health_mate/screens/home_screen.dart';
+import 'package:health_mate/widgets/bottom_bar.dart';
 
 class OnboardingFlowScreen extends StatefulWidget {
   const OnboardingFlowScreen({super.key});
@@ -268,7 +268,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
       // นำทางไปยัง HomeScreen และลบหน้า Onboarding ออกจาก stack
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const BottomBar()),
       );
     } catch (e) {
       if (!mounted) return;

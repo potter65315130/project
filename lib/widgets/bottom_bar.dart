@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../screens/home_screen.dart';
-import '../screens/activity_tracking_screen.dart';
-import '../screens/food_category/food_logging_screen.dart';
-import '../screens/weather_screen.dart';
+import 'package:health_mate/screens/home_screen.dart';
+import 'package:health_mate/screens/activity_tracking_screen.dart';
+import 'package:health_mate/screens/food_category/food_logging_screen.dart';
+import 'package:health_mate/screens/weather_screen.dart';
 
 class BottomBar extends StatefulWidget {
   const BottomBar({super.key});
