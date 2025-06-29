@@ -537,7 +537,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 80), // Bottom padding
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),

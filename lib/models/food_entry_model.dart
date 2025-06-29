@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FoodEntryModel {
+  final String? id; // MODIFIED: เพิ่ม property 'id' สำหรับเก็บ Document ID
   final String name;
   final double calories;
   final double protein;
@@ -9,6 +10,7 @@ class FoodEntryModel {
   final DateTime timestamp;
 
   FoodEntryModel({
+    this.id, // MODIFIED: เพิ่ม 'id' เข้าไปใน constructor
     required this.name,
     required this.calories,
     required this.protein,
@@ -17,7 +19,7 @@ class FoodEntryModel {
     required this.timestamp,
   });
 
-  // แปลง Object เป็น Map เพื่อบันทึกลง Firestore
+  // toFirestore ไม่ต้องแก้ไข เพราะเราไม่ต้องการบันทึก id ลงในข้อมูลของ document
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
@@ -29,12 +31,13 @@ class FoodEntryModel {
     };
   }
 
-  // สร้าง Object จาก DocumentSnapshot ที่ดึงมาจาก Firestore
+  // MODIFIED: แก้ไข factory ให้ดึง ID จาก DocumentSnapshot
   factory FoodEntryModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data()!;
     return FoodEntryModel(
+      id: doc.id, // <-- จุดสำคัญ: ดึง ID ของเอกสารมาใช้งาน
       name: data['name'] ?? '',
       calories: (data['calories'] as num?)?.toDouble() ?? 0.0,
       protein: (data['protein'] as num?)?.toDouble() ?? 0.0,

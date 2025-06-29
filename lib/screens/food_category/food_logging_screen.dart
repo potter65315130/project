@@ -1,19 +1,21 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:health_mate/screens/food_category/food_category_list_screen.dart';
 import 'package:health_mate/screens/history/food_log_history_screen.dart';
 import 'package:health_mate/services/food_data_service.dart';
 import 'package:health_mate/widgets/food_log_dialog.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:health_mate/models/food_entry_model.dart';
 import 'package:health_mate/models/food_item_model.dart';
 import 'package:health_mate/providers/home_provider.dart';
 import 'package:health_mate/services/firestore_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+
+// ADDED: import สำหรับหน้าจอและ Dialog ที่สร้างใหม่
+import 'package:health_mate/screens/barcode_scanner_screen.dart';
+import 'package:health_mate/widgets/food_entry_detail_dialog.dart';
 
 class FoodLoggingScreen extends StatefulWidget {
   const FoodLoggingScreen({super.key});
@@ -65,7 +67,6 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     }
   }
 
-  // --- UI Helpers ---
   void _showErrorSnackBar(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,23 +75,19 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     }
   }
 
-  // --- Barcode Scanning Logic ---
+  // MODIFIED: ฟังก์ชันสแกนบาร์โค้ดจะเรียกหน้าจอใหม่และรอผลลัพธ์กลับมา
   Future<void> _scanBarcode() async {
     try {
-      await Navigator.push(
+      final String? barcode = await Navigator.push<String>(
         context,
-        MaterialPageRoute(
-          builder:
-              (context) => BarcodeScannerScreen(
-                onBarcodeDetected: (barcode) {
-                  Navigator.of(context).pop();
-                  _fetchFoodDataFromApi(barcode);
-                },
-              ),
-        ),
+        MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
       );
+
+      if (barcode != null && barcode.isNotEmpty && mounted) {
+        _fetchFoodDataFromApi(barcode);
+      }
     } catch (e) {
-      _showErrorSnackBar('เกิดข้อผิดพลาดในการเปิดกล้อง: $e');
+      _showErrorSnackBar('เกิดข้อผิดพลาดในการสแกน: $e');
     }
   }
 
@@ -117,7 +114,6 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
             carbs: (nutriments['carbohydrates_100g'] ?? 0.0).toDouble(),
             fat: (nutriments['fat_100g'] ?? 0.0).toDouble(),
           );
-          // ใช้ Dialog กลาง
           if (mounted) {
             showFoodLogDialog(context: context, item: foodItem);
           }
@@ -134,7 +130,6 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     }
   }
 
-  // --- Build Methods ---
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -271,11 +266,13 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     );
   }
 
+  // MODIFIED: เพิ่มความสามารถในการดูรายละเอียดและลบรายการ
   Widget buildTodaysLogList() {
     if (_uid == null) {
       return const Center(child: Text('กรุณาเข้าสู่ระบบ'));
     }
     final todayString = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
     return StreamBuilder<List<FoodEntryModel>>(
       stream: _firestoreService.getFoodEntriesStream(_uid, todayString),
       builder: (context, snapshot) {
@@ -303,9 +300,38 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
               subtitle: Text(
                 '${entry.calories.toStringAsFixed(0)} kcal - ${DateFormat.Hm().format(entry.timestamp)}',
               ),
-              trailing: Text(
-                'P:${entry.protein.toStringAsFixed(0)} C:${entry.carbs.toStringAsFixed(0)} F:${entry.fat.toStringAsFixed(0)}',
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'P:${entry.protein.toStringAsFixed(0)} C:${entry.carbs.toStringAsFixed(0)} F:${entry.fat.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(width: 8),
+                  // ADDED: ปุ่มสำหรับลบรายการอย่างรวดเร็ว
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.redAccent,
+                    ),
+                    onPressed: () {
+                      if (entry.id != null) {
+                        context.read<HomeProvider>().deleteFoodLog(entry);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('ลบรายการแล้ว'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
+              // ADDED: กดที่รายการเพื่อดูรายละเอียดเพิ่มเติม
+              onTap: () {
+                showFoodEntryDetailDialog(context: context, entry: entry);
+              },
             );
           },
         );
@@ -379,65 +405,4 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
   }
 }
 
-class BarcodeScannerScreen extends StatefulWidget {
-  final Function(String) onBarcodeDetected;
-  const BarcodeScannerScreen({super.key, required this.onBarcodeDetected});
-
-  @override
-  State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
-}
-
-class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
-  final MobileScannerController controller = MobileScannerController();
-  bool isTorchOn = false;
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  void _toggleTorch() async {
-    try {
-      await controller.toggleTorch();
-      setState(() {
-        isTorchOn = !isTorchOn;
-      });
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error toggling torch: $e');
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('สแกนบาร์โค้ด'),
-        actions: [
-          IconButton(
-            onPressed: _toggleTorch,
-            icon: Icon(
-              isTorchOn ? Icons.flash_on : Icons.flash_off,
-              color: isTorchOn ? Colors.yellow : Colors.grey,
-            ),
-          ),
-        ],
-      ),
-      body: MobileScanner(
-        controller: controller,
-        onDetect: (BarcodeCapture capture) {
-          final List<Barcode> barcodes = capture.barcodes;
-          if (barcodes.isNotEmpty) {
-            final String? code = barcodes.first.rawValue;
-            if (code != null) {
-              controller.stop();
-              widget.onBarcodeDetected(code);
-            }
-          }
-        },
-      ),
-    );
-  }
-}
+// REMOVED: BarcodeScannerScreen และ _BarcodeScannerScreenState ถูกย้ายไปไฟล์ใหม่แล้ว

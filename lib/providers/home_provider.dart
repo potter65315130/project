@@ -101,6 +101,37 @@ class HomeProvider with ChangeNotifier {
       await loadData(); // โหลดข้อมูลใหม่แม้จะเกิดข้อผิดพลาด
     }
   }
+  // ในไฟล์ home_provider.dart
+  // ใช้โค้ดนี้แทนเวอร์ชันเก่า
+
+  Future<void> deleteFoodLog(FoodEntryModel entryToDelete) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    // ตรวจสอบให้แน่ใจว่า entry ที่จะลบมี ID
+    if (entryToDelete.id == null) {
+      if (kDebugMode) print('Cannot delete food log without an ID.');
+      return;
+    }
+
+    try {
+      // 1. เตรียมข้อมูล date string จาก timestamp ของ entry
+      final dateString = DateFormat(
+        'yyyy-MM-dd',
+      ).format(entryToDelete.timestamp);
+
+      // 2. เรียกใช้ Service ด้วย parameters ที่ถูกต้อง
+      await _firestoreService.deleteFoodEntry(uid, dateString, entryToDelete);
+
+      // 3. โหลดข้อมูลใหม่เพื่อให้ UI ทั้งหมดอัปเดต
+      await loadData();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting food log in Provider: $e');
+      }
+      // สามารถแจ้งเตือนผู้ใช้ว่าลบไม่สำเร็จได้ที่นี่
+    }
+  }
 
   Future<void> logActivity(RunningSessionModel session) async {
     final uid = _auth.currentUser?.uid;
