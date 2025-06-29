@@ -8,7 +8,22 @@
         { "name": "ข้าวผัดหมู (1 จาน)", "calories": 550, "protein": 20, "carbs": 65, "fat": 22 },
         { "name": "ก๋วยเตี๋ยวเรือ (1 ชาม)", "calories": 380, "protein": 18, "carbs": 40, "fat": 15 },
         { "name": "ข้าวกะเพราไข่ดาว (1 จาน)", "calories": 720, "protein": 23, "carbs": 55, "fat": 40 },
-        { "name": "ข้าวหน้าเป็ด (1 จาน)", "calories": 680, "protein": 26, "carbs": 60, "fat": 35 }
+        { "name": "ข้าวหน้าเป็ด (1 จาน)", "calories": 680, "protein": 26, "carbs": 60, "fat": 35 },
+        { "name": "ข้าวหมูแดง (1 จาน)", "calories": 580, "protein": 22, "carbs": 60, "fat": 20 },
+        { "name": "ข้าวหมูกรอบ (1 จาน)", "calories": 750, "protein": 24, "carbs": 58, "fat": 45 },
+        { "name": "ข้าวไข่เจียวหมูสับ (1 จาน)", "calories": 680, "protein": 21, "carbs": 50, "fat": 38 },
+        { "name": "ข้าวผัดกะเพราไก่ (1 จาน)", "calories": 650, "protein": 23, "carbs": 55, "fat": 32 },
+        { "name": "ราดหน้าเส้นใหญ่หมู (1 จาน)", "calories": 480, "protein": 20, "carbs": 45, "fat": 18 },
+        { "name": "ข้าวไข่ข้นแฮมชีส (1 จาน)", "calories": 700, "protein": 27, "carbs": 48, "fat": 40 },
+        { "name": "ข้าวขาหมู (1 จาน)", "calories": 800, "protein": 28, "carbs": 50, "fat": 50 },
+        { "name": "ข้าวหน้าไก่เทอริยากิ (1 จาน)", "calories": 550, "protein": 24, "carbs": 55, "fat": 20 },
+        { "name": "ข้าวผัดกุ้ง (1 จาน)", "calories": 600, "protein": 20, "carbs": 60, "fat": 25 },
+        { "name": "ก๋วยจั๊บญวน (1 ถ้วย)", "calories": 420, "protein": 18, "carbs": 45, "fat": 16 },
+        { "name": "ข้าวต้มหมู (1 ถ้วย)", "calories": 320, "protein": 15, "carbs": 38, "fat": 10 },
+        { "name": "ข้าวผัดปู (1 จาน)", "calories": 620, "protein": 22, "carbs": 62, "fat": 26 },
+        { "name": "บะหมี่แห้งหมูแดง (1 ชาม)", "calories": 490, "protein": 20, "carbs": 52, "fat": 18 },
+        { "name": "ข้าวราดแกงเขียวหวานไก่ (1 จาน)", "calories": 680, "protein": 25, "carbs": 55, "fat": 30 },
+        { "name": "ข้าวคลุกกะปิ (1 จาน)", "calories": 700, "protein": 22, "carbs": 65, "fat": 32 }
       ]
     },
     {
