@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:health_mate/screens/onboarding_flow_screen.dart';
-import 'package:health_mate/screens/login_screen.dart'; // จำเป็นสำหรับปุ่ม "กลับ"
-import 'package:health_mate/widgets/login_button.dart'; // สมมติว่า widget นี้มีอยู่
+import 'package:health_mate/screens/login_screen.dart';
+import 'package:health_mate/widgets/login_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_mate/services/firestore_service.dart';
-import 'package:health_mate/models/user_model.dart'; // ตรวจสอบว่านำเข้า UserModel ที่ถูกต้อง
+import 'package:health_mate/models/user_model.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -100,31 +100,29 @@ class _SignupScreenState extends State<SignupScreen> {
 
       final uid = userCredential.user!.uid;
 
-      // สร้าง UserModel ด้วยข้อมูลพื้นฐาน (OnboardingFlowScreen จะกรอกส่วนที่เหลือ)
+      // สร้าง UserModel ด้วยข้อมูลพื้นฐาน
       final newUser = UserModel(
-        uid: uid, // กำหนด uid ที่ได้จากการสมัคร
-        name: '', // จะกรอกใน OnboardingFlow
+        uid: uid,
+        name: '',
         email: email,
-        weight: 0.0, // จะกรอกใน OnboardingFlow
-        targetWeight: 0.0, // จะกรอกใน OnboardingFlow
-        height: 0.0, // จะกรอกใน OnboardingFlow
-        age: 0, // จะกรอกใน OnboardingFlow
-        gender: '', // จะกรอกใน OnboardingFlow
-        bmi: 0.0, // จะคำนวณใน OnboardingFlow
-        bmr: 0.0, // จะคำนวณใน OnboardingFlow
-        activityFactor: 1.2, // จะเลือกใน OnboardingFlow
-        plan: '', // จะกำหนดใน OnboardingFlow
-        planWeeklyTarget: 0.0, // จะกำหนดใน OnboardingFlow
-        planStartDate: null, // จะกำหนดใน OnboardingFlow
-        planDurationDays: 0, // จะกำหนดใน OnboardingFlow
-        dailyCalorieTarget: 0.0, // จะคำนวณใน OnboardingFlow
+        weight: 0.0,
+        targetWeight: 0.0,
+        height: 0.0,
+        age: 0,
+        gender: '',
+        bmi: 0.0,
+        bmr: 0.0,
+        activityFactor: 1.2,
+        plan: '',
+        planWeeklyTarget: 0.0,
+        planStartDate: null,
+        planDurationDays: 0,
+        dailyCalorieTarget: 0.0,
       );
 
-      // ใช้ FirestoreService สร้างข้อมูลผู้ใช้พื้นฐาน
       await FirestoreService().createUser(uid, newUser);
 
       if (!mounted) return;
-      // นำทางไปยังหน้า OnboardingFlowScreen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingFlowScreen()),
@@ -163,180 +161,276 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF1A1A1A), // เปลี่ยนเป็นสีดำเหมือนในภาพ
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(30, 10, 30, 30),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                // ตรวจสอบว่า path ถูกต้องและมีไฟล์ใน assets
-                Image.asset(
-                  "assets/login01.png",
-                  width: 200,
-                  height: 150,
-                  fit: BoxFit.contain,
+                const SizedBox(height: 60),
+                // ไอคอนแดมเบล
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFB4FF39), // สีเขียวสดใส
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(
+                    Icons.fitness_center,
+                    size: 40,
+                    color: Colors.black,
+                  ),
                 ),
+                const SizedBox(height: 30),
+                // หัวข้อ Sign up
                 const Text(
-                  "สมัครสมาชิก",
+                  "Sign up",
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 25),
-                TextField(
-                  controller: _emailController,
-                  cursorColor: Colors.green,
-                  style: const TextStyle(color: Colors.green),
-                  decoration: InputDecoration(
-                    labelText: "อีเมล",
-                    labelStyle: const TextStyle(color: Colors.green),
-                    filled: true,
-                    fillColor: Colors.white,
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.green,
-                        width: 1.5,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.green,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                const SizedBox(height: 40),
+                
+                // ฟิลด์อีเมล
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2A2A),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                  child: TextField(
+                    controller: _emailController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Email",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      prefixIcon: const Icon(
+                        Icons.email_outlined,
+                        color: Color(0xFFB4FF39),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
                 ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _isPasswordHidden,
-                  cursorColor: Colors.green,
-                  style: const TextStyle(color: Colors.green),
-                  decoration: InputDecoration(
-                    labelText: "รหัสผ่าน",
-                    labelStyle: const TextStyle(color: Colors.green),
-                    filled: true,
-                    fillColor: Colors.white,
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordHidden = !_isPasswordHidden;
-                        });
-                      },
-                      icon: Icon(
-                        _isPasswordHidden
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.green,
+                const SizedBox(height: 16),
+                
+                // ฟิลด์รหัสผ่าน
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2A2A),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: _isPasswordHidden,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Password",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        color: Color(0xFFB4FF39),
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.green,
-                        width: 1.5,
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordHidden = !_isPasswordHidden;
+                          });
+                        },
+                        icon: Icon(
+                          _isPasswordHidden
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: const Color(0xFFB4FF39),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.green,
-                        width: 2,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                 ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: _confirmPasswordController,
-                  obscureText: _isConfirmPasswordHidden,
-                  cursorColor: Colors.green,
-                  style: const TextStyle(color: Colors.green),
-                  decoration: InputDecoration(
-                    labelText: "ยืนยันรหัสผ่าน",
-                    labelStyle: const TextStyle(color: Colors.green),
-                    filled: true,
-                    fillColor: Colors.white,
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
-                        });
-                      },
-                      icon: Icon(
-                        _isConfirmPasswordHidden
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.green,
+                const SizedBox(height: 16),
+                
+                // ฟิลด์ยืนยันรหัสผ่าน
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2A2A),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: _isConfirmPasswordHidden,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Confirm Password",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        color: Color(0xFFB4FF39),
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.green,
-                        width: 1.5,
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
+                          });
+                        },
+                        icon: Icon(
+                          _isConfirmPasswordHidden
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: const Color(0xFFB4FF39),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.green,
-                        width: 2,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 40),
+                
+                // ปุ่ม Get Started
                 if (_isLoading)
                   const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB4FF39)),
                   )
                 else
-                  SizedBox(
+                  Container(
                     width: double.infinity,
-                    child: LoginButton(
-                      onTap: _signUp,
-                      buttontext: "ลงทะเบียน",
-                      borderRadius: 25.0,
-                      color: const Color.fromARGB(255, 96, 154, 254),
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB4FF39),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Get Started",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.black,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                const SizedBox(height: 15),
-                SizedBox(
-                  width: double.infinity,
-                  child: LoginButton(
-                    onTap: () {
-                      if (_isLoading) return;
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-                    },
-                    buttontext: "กลับไปหน้าเข้าสู่ระบบ",
-                    borderRadius: 25.0,
-                    color: const Color.fromARGB(255, 254, 110, 110),
+                
+                const SizedBox(height: 30),
+                
+                // ข้อความ "or"
+                Text(
+                  "or",
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 16,
                   ),
+                ),
+                
+                const SizedBox(height: 30),
+                
+                // ปุ่ม Social Login
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSocialButton(Icons.g_mobiledata, () {}),
+                    const SizedBox(width: 20),
+                    _buildSocialButton(Icons.camera_alt_outlined, () {}),
+                    const SizedBox(width: 20),
+                    _buildSocialButton(Icons.facebook, () {}),
+                  ],
+                ),
+                
+                const SizedBox(height: 40),
+                
+                // ลิงค์ไปหน้า Sign In
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Already have an account? ",
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        if (_isLoading) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Sign In",
+                        style: TextStyle(
+                          color: Color(0xFFB4FF39),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: const Color(0xFFB4FF39),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: const Color(0xFFB4FF39),
+          size: 24,
         ),
       ),
     );
