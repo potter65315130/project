@@ -168,7 +168,37 @@ class _SignupScreenState extends State<SignupScreen> {
             padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: 20),
+                // ปุ่มย้อนกลับ
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (_isLoading) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2A2A2A),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Color(0xFFB4FF39),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40),
                 // ไอคอนแดมเบล
                 Container(
                   width: 80,
@@ -346,31 +376,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 
-                const SizedBox(height: 30),
-                
-                // ข้อความ "or"
-                Text(
-                  "or",
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 16,
-                  ),
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // ปุ่ม Social Login
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildSocialButton(Icons.g_mobiledata, () {}),
-                    const SizedBox(width: 20),
-                    _buildSocialButton(Icons.camera_alt_outlined, () {}),
-                    const SizedBox(width: 20),
-                    _buildSocialButton(Icons.facebook, () {}),
-                  ],
-                ),
-                
                 const SizedBox(height: 40),
                 
                 // ลิงค์ไปหน้า Sign In
@@ -408,29 +413,6 @@ class _SignupScreenState extends State<SignupScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: const Color(0xFFB4FF39),
-            width: 1,
-          ),
-        ),
-        child: Icon(
-          icon,
-          color: const Color(0xFFB4FF39),
-          size: 24,
         ),
       ),
     );

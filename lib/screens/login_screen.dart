@@ -38,13 +38,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9ACD32), // Lime green
+                    color: const Color(0xFFB4FF39), // สีเขียวสดใส
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(
                     Icons.fitness_center,
                     size: 40,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -273,59 +273,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                // Divider
-                const Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        thickness: 1,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        "หรือ",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        thickness: 1,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                // Social Login Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildSocialButton(
-                      icon: Icons.g_mobiledata,
-                      onTap: () {
-                        // Google login
-                      },
-                    ),
-                    _buildSocialButton(
-                      icon: Icons.camera_alt_outlined,
-                      onTap: () {
-                        // Instagram login
-                      },
-                    ),
-                    _buildSocialButton(
-                      icon: Icons.facebook,
-                      onTap: () {
-                        // Facebook login
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
                 // Sign up link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -360,28 +307,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(
-          icon,
-          color: const Color(0xFF9ACD32),
-          size: 24,
         ),
       ),
     );
