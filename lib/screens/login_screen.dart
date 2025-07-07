@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_mate/screens/signup_screen.dart';
 import 'package:health_mate/widgets/bottom_bar.dart';
-import 'package:health_mate/widgets/login_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -126,122 +125,146 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () async {
-                            String email = emailController.text.trim();
-                            String password = passwordController.text;
+                    onPressed:
+                        _isLoading
+                            ? null
+                            : () async {
+                              String email = emailController.text.trim();
+                              String password = passwordController.text;
 
-                            if (email.isEmpty || password.isEmpty) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xFF2A2A2A),
-                                  title: const Text(
-                                    "ข้อมูลไม่ครบ",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: const Text(
-                                    "กรุณากรอกอีเมลและรหัสผ่าน",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text(
-                                        "ตกลง",
-                                        style: TextStyle(color: Color(0xFF9ACD32)),
+                              if (email.isEmpty || password.isEmpty) {
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        backgroundColor: const Color(
+                                          0xFF2A2A2A,
+                                        ),
+                                        title: const Text(
+                                          "ข้อมูลไม่ครบ",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        content: const Text(
+                                          "กรุณากรอกอีเมลและรหัสผ่าน",
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () =>
+                                                    Navigator.of(context).pop(),
+                                            child: const Text(
+                                              "ตกลง",
+                                              style: TextStyle(
+                                                color: Color(0xFF9ACD32),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              return;
-                            }
-
-                            if (!isValidEmail(email)) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xFF2A2A2A),
-                                  title: const Text(
-                                    "อีเมลไม่ถูกต้อง",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: const Text(
-                                    "กรุณากรอกอีเมลให้ถูกต้อง เช่น name@email.com",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text(
-                                        "ตกลง",
-                                        style: TextStyle(color: Color(0xFF9ACD32)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              return;
-                            }
-
-                            setState(() {
-                              _isLoading = true;
-                            });
-
-                            try {
-                              await FirebaseAuth.instance
-                                  .signInWithEmailAndPassword(
-                                    email: email,
-                                    password: password,
-                                  );
-
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const BottomBar(),
-                                ),
-                              );
-                            } on FirebaseAuthException catch (e) {
-                              String message = "";
-                              if (e.code == 'user-not-found') {
-                                message = "ไม่พบผู้ใช้งานนี้";
-                              } else if (e.code == 'wrong-password') {
-                                message = "รหัสผ่านไม่ถูกต้อง";
-                              } else {
-                                message = "เกิดข้อผิดพลาด: ${e.message}";
+                                );
+                                return;
                               }
 
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xFF2A2A2A),
-                                  title: const Text(
-                                    "เข้าสู่ระบบไม่สำเร็จ",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: Text(
-                                    message,
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text(
-                                        "ตกลง",
-                                        style: TextStyle(color: Color(0xFF9ACD32)),
+                              if (!isValidEmail(email)) {
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        backgroundColor: const Color(
+                                          0xFF2A2A2A,
+                                        ),
+                                        title: const Text(
+                                          "อีเมลไม่ถูกต้อง",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        content: const Text(
+                                          "กรุณากรอกอีเมลให้ถูกต้อง เช่น name@email.com",
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () =>
+                                                    Navigator.of(context).pop(),
+                                            child: const Text(
+                                              "ตกลง",
+                                              style: TextStyle(
+                                                color: Color(0xFF9ACD32),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            } finally {
+                                );
+                                return;
+                              }
+
                               setState(() {
-                                _isLoading = false;
+                                _isLoading = true;
                               });
-                            }
-                          },
+
+                              try {
+                                await FirebaseAuth.instance
+                                    .signInWithEmailAndPassword(
+                                      email: email,
+                                      password: password,
+                                    );
+
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const BottomBar(),
+                                  ),
+                                );
+                              } on FirebaseAuthException catch (e) {
+                                String message = "";
+                                if (e.code == 'user-not-found') {
+                                  message = "ไม่พบผู้ใช้งานนี้";
+                                } else if (e.code == 'wrong-password') {
+                                  message = "รหัสผ่านไม่ถูกต้อง";
+                                } else {
+                                  message = "เกิดข้อผิดพลาด: ${e.message}";
+                                }
+
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        backgroundColor: const Color(
+                                          0xFF2A2A2A,
+                                        ),
+                                        title: const Text(
+                                          "เข้าสู่ระบบไม่สำเร็จ",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        content: Text(
+                                          message,
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () =>
+                                                    Navigator.of(context).pop(),
+                                            child: const Text(
+                                              "ตกลง",
+                                              style: TextStyle(
+                                                color: Color(0xFF9ACD32),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                              } finally {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              }
+                            },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF9ACD32),
                       foregroundColor: Colors.black,
@@ -279,10 +302,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text(
                       "Don't have an account? ",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () {

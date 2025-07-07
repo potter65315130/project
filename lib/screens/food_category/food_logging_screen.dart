@@ -17,6 +17,14 @@ import 'package:provider/provider.dart';
 import 'package:health_mate/screens/barcode_scanner_screen.dart';
 import 'package:health_mate/widgets/food_entry_detail_dialog.dart';
 
+// --- UI THEME CONSTANTS ---
+const Color _darkBgColor = Color(0xFF1A1A1A);
+const Color _darkElementColor = Color(0xFF2A2A2A);
+const Color _accentColor = Color(0xFFB4F82B);
+const Color _lightTextColor = Colors.white;
+const Color _mediumTextColor = Color(0xFFB0B0B0);
+// --- END UI THEME CONSTANTS ---
+
 class FoodLoggingScreen extends StatefulWidget {
   const FoodLoggingScreen({super.key});
 
@@ -75,7 +83,6 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     }
   }
 
-  // MODIFIED: ฟังก์ชันสแกนบาร์โค้ดจะเรียกหน้าจอใหม่และรอผลลัพธ์กลับมา
   Future<void> _scanBarcode() async {
     try {
       final String? barcode = await Navigator.push<String>(
@@ -135,15 +142,26 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        backgroundColor: _darkBgColor,
         appBar: AppBar(
-          title: const Text('บันทึกอาหาร'),
+          backgroundColor: _darkBgColor,
+          elevation: 0,
+          title: const Text(
+            'บันทึกอาหาร',
+            style: TextStyle(color: _lightTextColor),
+          ),
           bottom: const TabBar(
+            labelColor: _accentColor,
+            unselectedLabelColor: _mediumTextColor,
+            indicatorColor: _accentColor,
             tabs: [Tab(text: 'ค้นหา'), Tab(text: 'รายการโปรด')],
           ),
         ),
         body:
             _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                  child: CircularProgressIndicator(color: _accentColor),
+                )
                 : TabBarView(
                   children: [
                     buildSearchTab(context),
@@ -161,13 +179,15 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
           padding: const EdgeInsets.all(16.0),
           child: TextField(
             controller: _searchController,
+            style: const TextStyle(color: _lightTextColor),
             decoration: InputDecoration(
               hintText: 'ค้นหาจากชื่อ...',
-              prefixIcon: const Icon(Icons.search),
+              hintStyle: const TextStyle(color: _mediumTextColor),
+              prefixIcon: const Icon(Icons.search, color: _accentColor),
               suffixIcon:
                   _isSearching
                       ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, color: _mediumTextColor),
                         onPressed: () => _searchController.clear(),
                       )
                       : null,
@@ -176,7 +196,7 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.grey[200],
+              fillColor: _darkElementColor,
             ),
           ),
         ),
@@ -193,13 +213,14 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildActionButton(
                 context,
                 icon: Icons.category_outlined,
-                label: 'ค้นหาจากหมวด',
+                label: 'หมวดหมู่',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -215,7 +236,7 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
               _buildActionButton(
                 context,
                 icon: Icons.history_outlined,
-                label: 'ดูบันทึกย้อนหลัง',
+                label: 'ย้อนหลัง',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -228,17 +249,21 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
               _buildActionButton(
                 context,
                 icon: Icons.qr_code_scanner_outlined,
-                label: 'สแกนบาร์โค้ด',
+                label: 'สแกน',
                 onTap: _scanBarcode,
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const Divider(),
+          const Divider(color: _darkElementColor),
           const SizedBox(height: 16),
           const Text(
             'รายการวันนี้',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: _lightTextColor,
+            ),
           ),
           const SizedBox(height: 8),
           buildTodaysLogList(),
@@ -249,15 +274,26 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
 
   Widget buildSearchResults() {
     if (_searchResults.isEmpty) {
-      return const Center(child: Text('ไม่พบรายการอาหารที่ค้นหา'));
+      return const Center(
+        child: Text(
+          'ไม่พบรายการอาหารที่ค้นหา',
+          style: TextStyle(color: _mediumTextColor),
+        ),
+      );
     }
     return ListView.builder(
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final item = _searchResults[index];
         return ListTile(
-          title: Text(item.name),
-          subtitle: Text('${item.calories.toStringAsFixed(0)} kcal'),
+          title: Text(
+            item.name,
+            style: const TextStyle(color: _lightTextColor),
+          ),
+          subtitle: Text(
+            '${item.calories.toStringAsFixed(0)} kcal',
+            style: const TextStyle(color: _mediumTextColor),
+          ),
           onTap: () {
             showFoodLogDialog(context: context, item: item);
           },
@@ -266,10 +302,14 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
     );
   }
 
-  // MODIFIED: เพิ่มความสามารถในการดูรายละเอียดและลบรายการ
   Widget buildTodaysLogList() {
     if (_uid == null) {
-      return const Center(child: Text('กรุณาเข้าสู่ระบบ'));
+      return const Center(
+        child: Text(
+          'กรุณาเข้าสู่ระบบ',
+          style: TextStyle(color: _mediumTextColor),
+        ),
+      );
     }
     final todayString = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -277,15 +317,27 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
       stream: _firestoreService.getFoodEntriesStream(_uid, todayString),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: _accentColor),
+          );
         }
         if (snapshot.hasError) {
-          return Center(child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
+          return Center(
+            child: Text(
+              'เกิดข้อผิดพลาด: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox(
             height: 100,
-            child: Center(child: Text('ยังไม่มีรายการที่บันทึกในวันนี้')),
+            child: Center(
+              child: Text(
+                'ยังไม่มีรายการที่บันทึกในวันนี้',
+                style: TextStyle(color: _mediumTextColor),
+              ),
+            ),
           );
         }
         final entries = snapshot.data!;
@@ -296,19 +348,25 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
           itemBuilder: (context, index) {
             final entry = entries[index];
             return ListTile(
-              title: Text(entry.name),
+              title: Text(
+                entry.name,
+                style: const TextStyle(color: _lightTextColor),
+              ),
               subtitle: Text(
                 '${entry.calories.toStringAsFixed(0)} kcal - ${DateFormat.Hm().format(entry.timestamp)}',
+                style: const TextStyle(color: _mediumTextColor),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'P:${entry.protein.toStringAsFixed(0)} C:${entry.carbs.toStringAsFixed(0)} F:${entry.fat.toStringAsFixed(0)}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: const TextStyle(
+                      color: _mediumTextColor,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(width: 8),
-                  // ADDED: ปุ่มสำหรับลบรายการอย่างรวดเร็ว
                   IconButton(
                     icon: const Icon(
                       Icons.delete_outline,
@@ -328,7 +386,6 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
                   ),
                 ],
               ),
-              // ADDED: กดที่รายการเพื่อดูรายละเอียดเพิ่มเติม
               onTap: () {
                 showFoodEntryDetailDialog(context: context, entry: entry);
               },
@@ -341,19 +398,36 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
 
   Widget buildFavoritesTab(BuildContext context) {
     if (_uid == null) {
-      return const Center(child: Text('กรุณาเข้าสู่ระบบเพื่อใช้รายการโปรด'));
+      return const Center(
+        child: Text(
+          'กรุณาเข้าสู่ระบบเพื่อใช้รายการโปรด',
+          style: TextStyle(color: _mediumTextColor),
+        ),
+      );
     }
     return StreamBuilder<List<FoodItem>>(
       stream: _firestoreService.getFavoritesStream(_uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: _accentColor),
+          );
         }
         if (snapshot.hasError) {
-          return Center(child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
+          return Center(
+            child: Text(
+              'เกิดข้อผิดพลาด: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('คุณยังไม่มีรายการโปรด'));
+          return const Center(
+            child: Text(
+              'คุณยังไม่มีรายการโปรด',
+              style: TextStyle(color: _mediumTextColor),
+            ),
+          );
         }
 
         final favorites = snapshot.data!;
@@ -363,8 +437,14 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
             final item = favorites[index];
             return ListTile(
               leading: const Icon(Icons.star, color: Colors.amber),
-              title: Text(item.name),
-              subtitle: Text('${item.calories.toStringAsFixed(0)} kcal'),
+              title: Text(
+                item.name,
+                style: const TextStyle(color: _lightTextColor),
+              ),
+              subtitle: Text(
+                '${item.calories.toStringAsFixed(0)} kcal',
+                style: const TextStyle(color: _mediumTextColor),
+              ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
                 onPressed: () {
@@ -389,20 +469,26 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        decoration: BoxDecoration(
+          color: _darkElementColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 30, color: Theme.of(context).primaryColor),
-            const SizedBox(height: 4),
-            Text(label, textAlign: TextAlign.center),
+            Icon(icon, size: 30, color: _accentColor),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: _lightTextColor),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
-// REMOVED: BarcodeScannerScreen และ _BarcodeScannerScreenState ถูกย้ายไปไฟล์ใหม่แล้ว

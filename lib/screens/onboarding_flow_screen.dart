@@ -18,6 +18,13 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   int _currentPage = 0;
   bool _isLoading = false;
 
+  // Colors from Signup Screen
+  static const Color _backgroundColor = Color(0xFF1A1A1A);
+  static const Color _primaryColor = Color(0xFFB4FF39);
+  static const Color _fieldColor = Color(0xFF2A2A2A);
+  static const Color _textColor = Colors.white;
+  static final Color _hintColor = Colors.grey[400]!;
+
   // Step 1: Gender Selection
   String? _selectedGender;
 
@@ -51,7 +58,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     super.dispose();
   }
 
-  // Navigation functions
+  // --- LOGIC FUNCTIONS (UNCHANGED) ---
   void _nextPage() {
     if (_currentPage < 4) {
       _pageController.nextPage(
@@ -70,7 +77,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     }
   }
 
-  // Validation functions
   bool _isStep1Valid() => _selectedGender != null;
 
   bool _isStep2Valid() {
@@ -96,11 +102,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         double.tryParse(_currentWeightController.text.trim()) ?? 0;
     final targetWeight =
         double.tryParse(_targetWeightController.text.trim()) ?? 0;
-
-    // ถ้าน้ำหนักเท่ากัน (รักษาน้ำหนัก) ไม่ต้องเลือก plan speed
     if (currentWeight == targetWeight) return true;
-
-    // ถ้าต้องการเปลี่ยนน้ำหนัก ต้องเลือก plan speed
     return _selectedPlanSpeed != null;
   }
 
@@ -182,19 +184,15 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     }
 
     try {
-      // Get form data
       final age = int.parse(_ageController.text.trim());
       final height = double.parse(_heightController.text.trim());
       final currentWeight = double.parse(_currentWeightController.text.trim());
       final targetWeight = double.parse(_targetWeightController.text.trim());
       final activityFactor = _activityLevels[_selectedActivityLevel]!;
-
-      // Calculate values
       final bmi = _calculateBMI(currentWeight, height);
       final bmr = _calculateBMR(currentWeight, height, age, _selectedGender!);
       final tdee = _calculateTDEE(bmr, activityFactor);
 
-      // Plan calculations
       double weeklyTarget = 0.0;
       String planType = 'Maintain';
 
@@ -206,7 +204,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         } else if (_selectedPlanSpeed == 'Very Fast') {
           weeklyTarget = 1.0;
         }
-
         planType = targetWeight > currentWeight ? 'Gain' : 'Lose';
       }
 
@@ -216,14 +213,12 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         targetWeight,
         weeklyTarget,
       );
-
       final planDurationDays = _calculatePlanDurationDays(
         currentWeight,
         targetWeight,
         weeklyTarget,
       );
 
-      // Create or update user
       final firestoreService = FirestoreService();
       final existingUser = await firestoreService.getUser(user.uid);
 
@@ -264,8 +259,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ!')));
-
-      // นำทางไปยัง HomeScreen และลบหน้า Onboarding ออกจาก stack
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const BottomBar()),
@@ -280,14 +273,18 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     }
   }
 
+  // --- UI WIDGETS (RE-STYLED) ---
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
+            // Progress Bar
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 children: [
                   Row(
@@ -299,8 +296,8 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                           decoration: BoxDecoration(
                             color:
                                 index <= _currentPage
-                                    ? const Color(0xFF4CAF50)
-                                    : Colors.grey.shade300,
+                                    ? _primaryColor
+                                    : _fieldColor,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -310,16 +307,17 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'ขั้นตอนที่ ${_currentPage + 1} จาก 5',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 14, color: _hintColor),
                   ),
                 ],
               ),
             ),
 
-            // Page content
+            // Page Content
             Expanded(
               child: PageView(
                 controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (index) {
                   setState(() => _currentPage = index);
                 },
@@ -333,78 +331,94 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
               ),
             ),
 
-            // Navigation buttons
+            // Navigation Buttons
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Row(
                 children: [
                   if (_currentPage > 0)
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: _previousPage,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      child: SizedBox(
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: _previousPage,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: _primaryColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                          ),
+                          child: Text(
+                            'ย้อนกลับ',
+                            style: const TextStyle(
+                              color: _primaryColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
-                        child: const Text('ย้อนกลับ'),
                       ),
                     ),
                   if (_currentPage > 0) const SizedBox(width: 16),
                   Expanded(
-                    flex: _currentPage == 0 ? 1 : 1,
                     child:
                         _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : ElevatedButton(
-                              onPressed: () {
-                                if (_currentPage == 4) {
-                                  _saveAllDataAndComplete();
-                                } else {
-                                  bool canProceed = false;
-                                  switch (_currentPage) {
-                                    case 0:
-                                      canProceed = _isStep1Valid();
-                                      break;
-                                    case 1:
-                                      canProceed = _isStep2Valid();
-                                      break;
-                                    case 2:
-                                      canProceed = _isStep3Valid();
-                                      break;
-                                    case 3:
-                                      canProceed = _isStep4Valid();
-                                      break;
-                                  }
-
-                                  if (canProceed) {
-                                    _nextPage();
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'กรุณากรอกข้อมูลให้ครบถ้วน',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4CAF50),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 15,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
+                            ? const Center(
+                              child: CircularProgressIndicator(
+                                color: _primaryColor,
                               ),
-                              child: Text(
-                                _currentPage == 4 ? 'เริ่มใช้งาน' : 'ถัดไป',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
+                            )
+                            : SizedBox(
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_currentPage == 4) {
+                                    _saveAllDataAndComplete();
+                                  } else {
+                                    bool canProceed = false;
+                                    switch (_currentPage) {
+                                      case 0:
+                                        canProceed = _isStep1Valid();
+                                        break;
+                                      case 1:
+                                        canProceed = _isStep2Valid();
+                                        break;
+                                      case 2:
+                                        canProceed = _isStep3Valid();
+                                        break;
+                                      case 3:
+                                        canProceed = _isStep4Valid();
+                                        break;
+                                    }
+
+                                    if (canProceed) {
+                                      _nextPage();
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'กรุณากรอกข้อมูลให้ครบถ้วน',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                ),
+                                child: Text(
+                                  _currentPage == 4 ? 'เริ่มใช้งาน' : 'ถัดไป',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
@@ -420,32 +434,29 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
   // Page 1: Gender Selection
   Widget _buildGenderSelectionPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           const Text(
-            'ยินดีต้อนรับสู่แคลอรี่ ไดอารี่!',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            'ยินดีต้อนรับ!',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: _textColor,
+            ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'กรุณาบอกเราเกี่ยวกับตัวคุณสักนิด',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(fontSize: 16, color: _hintColor),
           ),
-          const SizedBox(height: 40),
-          Image.asset('assets/app.png', height: 120),
-          const SizedBox(height: 40),
+          const SizedBox(height: 60),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildGenderOption(
-                'Female',
-                'หญิง',
-                'assets/app.png',
-                Colors.pink,
-              ),
-              _buildGenderOption('Male', 'ชาย', 'assets/app.png', Colors.blue),
+              _buildGenderOption('Female', 'หญิง', Icons.female),
+              _buildGenderOption('Male', 'ชาย', Icons.male),
             ],
           ),
         ],
@@ -453,51 +464,64 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     );
   }
 
-  Widget _buildGenderOption(
-    String gender,
-    String label,
-    String assetPath,
-    Color color,
-  ) {
+  Widget _buildGenderOption(String gender, String label, IconData icon) {
     final isSelected = _selectedGender == gender;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedGender = gender),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 130,
-        height: 170,
+      child: Container(
+        width: 140,
+        height: 160,
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.15) : Colors.white,
-          border: Border.all(
-            color: isSelected ? color : Colors.grey.shade300,
-            width: 2,
-          ),
+          color: isSelected ? _primaryColor : _fieldColor,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: color.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(assetPath, height: 90),
+            Icon(icon, size: 80, color: isSelected ? Colors.black : _textColor),
             const SizedBox(height: 12),
             Text(
               label,
               style: TextStyle(
                 fontSize: 18,
-                color: color,
+                color: isSelected ? Colors.black : _textColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Helper for Input Fields
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.number,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: _fieldColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: _textColor),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(color: _hintColor),
+          prefixIcon: Icon(icon, color: _primaryColor),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+        keyboardType: keyboardType,
       ),
     );
   }
@@ -510,88 +534,108 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
-            'กรุณากรอกข้อมูลส่วนตัวของคุณ',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            'ข้อมูลส่วนตัวของคุณ',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: _textColor,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 30),
-          TextField(
+          const SizedBox(height: 40),
+          _buildTextField(
             controller: _ageController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'อายุ (ปี)',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            hintText: 'อายุ (ปี)',
+            icon: Icons.cake_outlined,
           ),
-          const SizedBox(height: 16),
-          TextField(
+          _buildTextField(
             controller: _heightController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'ส่วนสูง (ซม.)',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            hintText: 'ส่วนสูง (ซม.)',
+            icon: Icons.height_outlined,
           ),
-          const SizedBox(height: 16),
-          TextField(
+          _buildTextField(
             controller: _currentWeightController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'น้ำหนักปัจจุบัน (กก.)',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            hintText: 'น้ำหนักปัจจุบัน (กก.)',
+            icon: Icons.monitor_weight_outlined,
           ),
-          const SizedBox(height: 16),
-          TextField(
+          _buildTextField(
             controller: _targetWeightController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'น้ำหนักที่ต้องการ (กก.)',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            hintText: 'น้ำหนักที่ต้องการ (กก.)',
+            icon: Icons.flag_outlined,
           ),
         ],
       ),
     );
   }
 
+  // Helper for Selection Options (replaces RadioListTile)
+  Widget _buildSelectionOption({
+    required String title,
+    required String value,
+    required String? groupValue,
+    required Function(String?) onChanged,
+  }) {
+    final isSelected = value == groupValue;
+    return GestureDetector(
+      onTap: () => onChanged(value),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _fieldColor,
+          borderRadius: BorderRadius.circular(12),
+          border:
+              isSelected
+                  ? Border.all(color: _primaryColor, width: 2)
+                  : Border.all(color: Colors.transparent),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: isSelected ? _primaryColor : Colors.grey,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(color: _textColor, fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // Page 3: Activity Level
   Widget _buildActivityLevelPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
             'คุณออกกำลังกายบ่อยแค่ไหน?',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: _textColor,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
-          Expanded(
-            child: ListView(
-              children:
-                  _activityLevels.keys.map((String key) {
-                    return RadioListTile<String>(
-                      title: Text(key, style: const TextStyle(fontSize: 14)),
-                      value: key,
-                      groupValue: _selectedActivityLevel,
-                      onChanged:
-                          (value) =>
-                              setState(() => _selectedActivityLevel = value),
-                      activeColor: const Color(0xFF4CAF50),
-                    );
-                  }).toList(),
-            ),
-          ),
+          ..._activityLevels.keys.map((String key) {
+            return _buildSelectionOption(
+              title: key,
+              value: key,
+              groupValue: _selectedActivityLevel,
+              onChanged:
+                  (value) => setState(() => _selectedActivityLevel = value),
+            );
+          }),
         ],
       ),
     );
@@ -600,8 +644,11 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   // Page 4: Plan Selection
   Widget _buildPlanSelectionPage() {
     if (!_isStep2Valid()) {
-      return const Center(
-        child: Text('กรุณากรอกข้อมูลในขั้นตอนก่อนหน้าให้ครบถ้วน'),
+      return Center(
+        child: Text(
+          'กรุณากรอกข้อมูลในขั้นตอนก่อนหน้า',
+          style: TextStyle(color: _hintColor),
+        ),
       );
     }
 
@@ -609,11 +656,16 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     final targetWeight = double.parse(_targetWeightController.text.trim());
 
     String planType = 'รักษาน้ำหนัก';
-    if (targetWeight > currentWeight) {
+    if (targetWeight > currentWeight)
       planType = 'เพิ่มน้ำหนัก';
-    } else if (targetWeight < currentWeight) {
+    else if (targetWeight < currentWeight)
       planType = 'ลดน้ำหนัก';
-    }
+
+    final planSpeeds = {
+      'Normal': 'ธรรมดา (0.25 กก./สัปดาห์)',
+      'Fast': 'เร็ว (0.5 กก./สัปดาห์)',
+      'Very Fast': 'เร็วมาก (1 กก./สัปดาห์)',
+    };
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -622,64 +674,44 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         children: [
           Text(
             'เป้าหมายของคุณ: $planType',
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'น้ำหนักปัจจุบัน: ${currentWeight.toStringAsFixed(1)} กก.',
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            'น้ำหนักที่ต้องการ: ${targetWeight.toStringAsFixed(1)} กก.',
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: _textColor,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
-
           if (planType != 'รักษาน้ำหนัก') ...[
             const Text(
               'เลือกระดับความเร็วของแผน:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: _textColor,
+              ),
             ),
             const SizedBox(height: 16),
-            RadioListTile<String>(
-              title: Text(
-                'แบบธรรมดา (${planType.replaceAll('น้ำหนัก', '')}สัปดาห์ละ 0.25 กก.)',
-              ),
-              value: 'Normal',
-              groupValue: _selectedPlanSpeed,
-              onChanged: (value) => setState(() => _selectedPlanSpeed = value),
-              activeColor: const Color(0xFF4CAF50),
-            ),
-            RadioListTile<String>(
-              title: Text(
-                'แบบเร็ว (${planType.replaceAll('น้ำหนัก', '')}สัปดาห์ละ 0.5 กก.)',
-              ),
-              value: 'Fast',
-              groupValue: _selectedPlanSpeed,
-              onChanged: (value) => setState(() => _selectedPlanSpeed = value),
-              activeColor: const Color(0xFF4CAF50),
-            ),
-            RadioListTile<String>(
-              title: Text(
-                'แบบเร็วมาก (${planType.replaceAll('น้ำหนัก', '')}สัปดาห์ละ 1 กก.)',
-              ),
-              value: 'Very Fast',
-              groupValue: _selectedPlanSpeed,
-              onChanged: (value) => setState(() => _selectedPlanSpeed = value),
-              activeColor: const Color(0xFF4CAF50),
-            ),
+            ...planSpeeds.entries.map((entry) {
+              return _buildSelectionOption(
+                title: 'แบบ${entry.value}',
+                value: entry.key,
+                groupValue: _selectedPlanSpeed,
+                onChanged: (val) => setState(() => _selectedPlanSpeed = val),
+              );
+            }),
           ] else ...[
-            const Text(
-              'คุณเลือกแผนรักษาน้ำหนัก',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'เราจะคำนวณแคลอรี่ที่เหมาะสมสำหรับการรักษาน้ำหนักให้คุณ',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: _fieldColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'คุณเลือกแผนรักษาน้ำหนัก เราจะคำนวณแคลอรี่ที่เหมาะสมให้คุณโดยอัตโนมัติ',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: _hintColor),
+              ),
             ),
           ],
         ],
@@ -687,41 +719,40 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     );
   }
 
-  // Page 5: Summary Page - แสดงข้อมูลที่คำนวณเสร็จแล้ว
+  // Page 5: Summary Page
   Widget _buildSummaryPage() {
     if (!_isStep2Valid() || !_isStep3Valid()) {
-      return const Center(child: Text('กรุณากรอกข้อมูลให้ครบถ้วน'));
+      return Center(
+        child: Text(
+          'กรุณากรอกข้อมูลให้ครบถ้วน',
+          style: TextStyle(color: _hintColor),
+        ),
+      );
     }
 
-    // คำนวณข้อมูลทั้งหมด
     final age = int.parse(_ageController.text.trim());
     final height = double.parse(_heightController.text.trim());
     final currentWeight = double.parse(_currentWeightController.text.trim());
     final targetWeight = double.parse(_targetWeightController.text.trim());
     final activityFactor = _activityLevels[_selectedActivityLevel]!;
-
     final bmi = _calculateBMI(currentWeight, height);
     final bmr = _calculateBMR(currentWeight, height, age, _selectedGender!);
     final tdee = _calculateTDEE(bmr, activityFactor);
 
-    // คำนวณแผน
     double weeklyTarget = 0.0;
     String planType = 'รักษาน้ำหนัก';
-
-    if (targetWeight > currentWeight) {
+    if (targetWeight > currentWeight)
       planType = 'เพิ่มน้ำหนัก';
-    } else if (targetWeight < currentWeight) {
+    else if (targetWeight < currentWeight)
       planType = 'ลดน้ำหนัก';
-    }
 
     if (targetWeight != currentWeight && _selectedPlanSpeed != null) {
-      if (_selectedPlanSpeed == 'Normal') {
+      if (_selectedPlanSpeed == 'Normal')
         weeklyTarget = 0.25;
-      } else if (_selectedPlanSpeed == 'Fast') {
+      else if (_selectedPlanSpeed == 'Fast')
         weeklyTarget = 0.5;
-      } else if (_selectedPlanSpeed == 'Very Fast') {
+      else if (_selectedPlanSpeed == 'Very Fast')
         weeklyTarget = 1.0;
-      }
     }
 
     final dailyCalorieTarget = _calculateDailyCalorieTarget(
@@ -730,7 +761,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
       targetWeight,
       weeklyTarget,
     );
-
     final planDurationDays = _calculatePlanDurationDays(
       currentWeight,
       targetWeight,
@@ -744,18 +774,20 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         children: [
           const Text(
             'สรุปข้อมูลของคุณ',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: _textColor,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'ตรวจสอบข้อมูลก่อนเริ่มใช้งาน',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(fontSize: 16, color: _hintColor),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
-
-          // ข้อมูลพื้นฐาน
           _buildSummaryCard('ข้อมูลส่วนตัว', [
             _buildSummaryRow('เพศ', _selectedGender == 'Male' ? 'ชาย' : 'หญิง'),
             _buildSummaryRow('อายุ', '$age ปี'),
@@ -769,10 +801,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
               '${targetWeight.toStringAsFixed(1)} กก.',
             ),
           ]),
-
           const SizedBox(height: 16),
-
-          // ข้อมูลการคำนวณ
           _buildSummaryCard('ค่าทางโภชนาการ', [
             _buildSummaryRow(
               'BMI',
@@ -785,10 +814,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
               '${dailyCalorieTarget.toStringAsFixed(0)} แคลอรี่/วัน',
             ),
           ]),
-
           const SizedBox(height: 16),
-
-          // ข้อมูลแผน
           _buildSummaryCard('แผนของคุณ', [
             _buildSummaryRow('ประเภทแผน', planType),
             if (weeklyTarget > 0)
@@ -810,68 +836,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
             ],
             _buildSummaryRow('ระดับกิจกรรม', _getActivityLevelDisplay()),
           ]),
-
-          const SizedBox(height: 30),
-
-          // คำแนะนำ
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFF4CAF50).withOpacity(0.3),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.lightbulb_outline,
-                      color: const Color(0xFF4CAF50),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'คำแนะนำ',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4CAF50),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (planType == 'ลดน้ำหนัก')
-                  const Text(
-                    '• ดื่มน้ำเปล่าให้เพียงพอ อย่างน้อย 8 แก้วต่อวัน\n'
-                    '• เลือกรับประทานอาหารที่มีโปรตีนสูง\n'
-                    '• หลีกเลี่ยงอาหารที่มีน้ำตาลและไขมันสูง\n'
-                    '• ออกกำลังกายสม่ำเสมอ',
-                    style: TextStyle(fontSize: 14, height: 1.4),
-                  )
-                else if (planType == 'เพิ่มน้ำหนัก')
-                  const Text(
-                    '• รับประทานอาหารที่มีคุณค่าทางโภชนาการสูง\n'
-                    '• เพิ่มโปรตีนและคาร์โบไฮเดรตที่ดี\n'
-                    '• ออกกำลังกายแบบ Weight Training\n'
-                    '• รับประทานอาหารบ่อยๆ แต่ในปริมาณที่เหมาะสม',
-                    style: TextStyle(fontSize: 14, height: 1.4),
-                  )
-                else
-                  const Text(
-                    '• รักษาสมดุลของการรับประทานอาหาร\n'
-                    '• ออกกำลังกายสม่ำเสมอ\n'
-                    '• ดื่มน้ำเปล่าให้เพียงพอ\n'
-                    '• ตรวจสอบน้ำหนักเป็นประจำ',
-                    style: TextStyle(fontSize: 14, height: 1.4),
-                  ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -879,7 +843,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
   String _getActivityLevelDisplay() {
     if (_selectedActivityLevel == null) return '';
-
     final activityMap = {
       'ไม่ออกกำลังกายเลย หรือน้อยมาก (Sedentary)': 'ไม่ออกกำลังกาย',
       'ออกกำลังกายเบา (Lightly Active)': 'ออกกำลังกายเบา',
@@ -888,7 +851,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
       'ออกกำลังกายหนักมาก (Extremely Active/Super Active)':
           'ออกกำลังกายหนักมาก',
     };
-
     return activityMap[_selectedActivityLevel] ?? _selectedActivityLevel!;
   }
 
@@ -896,16 +858,8 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _fieldColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -915,10 +869,10 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF4CAF50),
+              color: _primaryColor,
             ),
           ),
-          const SizedBox(height: 12),
+          const Divider(color: Colors.grey, height: 24),
           ...children,
         ],
       ),
@@ -927,14 +881,18 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
   Widget _buildSummaryRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+          Text(label, style: TextStyle(fontSize: 14, color: _hintColor)),
           Text(
             value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: _textColor,
+            ),
           ),
         ],
       ),

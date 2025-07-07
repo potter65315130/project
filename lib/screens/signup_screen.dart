@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_mate/screens/onboarding_flow_screen.dart';
 import 'package:health_mate/screens/login_screen.dart';
-import 'package:health_mate/widgets/login_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_mate/services/firestore_service.dart';
@@ -224,7 +223,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                
+
                 // ฟิลด์อีเมล
                 Container(
                   decoration: BoxDecoration(
@@ -251,7 +250,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // ฟิลด์รหัสผ่าน
                 Container(
                   decoration: BoxDecoration(
@@ -291,7 +290,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // ฟิลด์ยืนยันรหัสผ่าน
                 Container(
                   decoration: BoxDecoration(
@@ -312,7 +311,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
-                            _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
+                            _isConfirmPasswordHidden =
+                                !_isConfirmPasswordHidden;
                           });
                         },
                         icon: Icon(
@@ -331,11 +331,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                
+
                 // ปุ่ม Get Started
                 if (_isLoading)
                   const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB4FF39)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFB4FF39),
+                    ),
                   )
                 else
                   Container(
@@ -375,19 +377,38 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
-                
+
+                const SizedBox(height: 30),
+
+                // ข้อความ "or"
+                Text(
+                  "or",
+                  style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                ),
+
+                const SizedBox(height: 30),
+
+                // ปุ่ม Social Login
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSocialButton(Icons.g_mobiledata, () {}),
+                    const SizedBox(width: 20),
+                    _buildSocialButton(Icons.camera_alt_outlined, () {}),
+                    const SizedBox(width: 20),
+                    _buildSocialButton(Icons.facebook, () {}),
+                  ],
+                ),
+
                 const SizedBox(height: 40),
-                
+
                 // ลิงค์ไปหน้า Sign In
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Already have an account? ",
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.grey[400], fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -414,6 +435,22 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: const Color(0xFFB4FF39), width: 1),
+        ),
+        child: Icon(icon, color: const Color(0xFFB4FF39), size: 24),
       ),
     );
   }

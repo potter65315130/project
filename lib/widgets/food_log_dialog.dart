@@ -4,6 +4,13 @@ import 'package:health_mate/models/food_item_model.dart';
 import 'package:health_mate/providers/home_provider.dart';
 import 'package:provider/provider.dart';
 
+// --- UI THEME CONSTANTS ---
+const Color _darkElementColor = Color(0xFF1E1E1E);
+const Color _accentColor = Color(0xFFB4F82B);
+const Color _lightTextColor = Colors.white;
+const Color _mediumTextColor = Color(0xFFB0B0B0);
+// --- END UI THEME CONSTANTS ---
+
 // ฟังก์ชันสำหรับแสดง Dialog บันทึกอาหาร
 Future<void> showFoodLogDialog({
   required BuildContext context,
@@ -26,7 +33,14 @@ Future<void> showFoodLogDialog({
           final calculatedFat = item.fat * quantity;
 
           return AlertDialog(
-            title: Text(item.name),
+            backgroundColor: _darkElementColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            title: Text(
+              item.name,
+              style: const TextStyle(color: _lightTextColor),
+            ),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -35,9 +49,20 @@ Future<void> showFoodLogDialog({
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
+                    style: const TextStyle(color: _lightTextColor),
+                    decoration: InputDecoration(
                       labelText: 'จำนวน (เช่น 1, 1.5)',
-                      border: OutlineInputBorder(),
+                      labelStyle: const TextStyle(color: _mediumTextColor),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.2),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: const BorderSide(color: _mediumTextColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: const BorderSide(color: _accentColor),
+                      ),
                     ),
                     onChanged: (value) {
                       quantityNotifier.value = double.tryParse(value) ?? 0.0;
@@ -46,26 +71,50 @@ Future<void> showFoodLogDialog({
                   const SizedBox(height: 16),
                   const Text(
                     'ข้อมูลโภชนาการ (โดยประมาณ)',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _lightTextColor,
+                    ),
                   ),
+                  const SizedBox(height: 8),
                   Text(
                     'แคลอรี่: ${calculatedCalories.toStringAsFixed(2)} kcal',
+                    style: const TextStyle(color: _mediumTextColor),
                   ),
-                  Text('โปรตีน: ${calculatedProtein.toStringAsFixed(2)} g'),
-                  Text('คาร์โบไฮเดรต: ${calculatedCarbs.toStringAsFixed(2)} g'),
-                  Text('ไขมัน: ${calculatedFat.toStringAsFixed(2)} g'),
+                  Text(
+                    'โปรตีน: ${calculatedProtein.toStringAsFixed(2)} g',
+                    style: const TextStyle(color: _mediumTextColor),
+                  ),
+                  Text(
+                    'คาร์โบไฮเดรต: ${calculatedCarbs.toStringAsFixed(2)} g',
+                    style: const TextStyle(color: _mediumTextColor),
+                  ),
+                  Text(
+                    'ไขมัน: ${calculatedFat.toStringAsFixed(2)} g',
+                    style: const TextStyle(color: _mediumTextColor),
+                  ),
                 ],
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('ยกเลิก'),
+                child: const Text(
+                  'ยกเลิก',
+                  style: TextStyle(color: _lightTextColor),
+                ),
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
                   quantityNotifier.dispose();
                 },
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _accentColor,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
                 child: const Text('บันทึก'),
                 onPressed:
                     quantity <= 0
@@ -86,9 +135,14 @@ Future<void> showFoodLogDialog({
                               Navigator.of(dialogContext).pop();
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('บันทึกข้อมูลเรียบร้อย!'),
-                                backgroundColor: Colors.green,
+                              SnackBar(
+                                content: const Text('บันทึกข้อมูลเรียบร้อย!'),
+                                backgroundColor: _accentColor,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: const EdgeInsets.all(10),
                               ),
                             );
                             quantityNotifier.dispose();
