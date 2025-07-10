@@ -6,15 +6,15 @@ import 'package:health_mate/screens/history/food_log_history_screen.dart';
 import 'package:health_mate/services/food_data_service.dart';
 import 'package:health_mate/widgets/food_log_dialog.dart';
 import 'package:intl/intl.dart';
-import 'package:health_mate/models/food_entry_model.dart';
-import 'package:health_mate/models/food_item_model.dart';
+import 'package:health_mate/models/food/food_entry_model.dart';
+import 'package:health_mate/models/food/food_item_model.dart';
 import 'package:health_mate/providers/home_provider.dart';
 import 'package:health_mate/services/firestore_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 // ADDED: import สำหรับหน้าจอและ Dialog ที่สร้างใหม่
-import 'package:health_mate/screens/barcode_scanner_screen.dart';
+import 'package:health_mate/screens/food_category/barcode_scanner_screen.dart';
 import 'package:health_mate/widgets/food_entry_detail_dialog.dart';
 
 // --- UI THEME CONSTANTS ---

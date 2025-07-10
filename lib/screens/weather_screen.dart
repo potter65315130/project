@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:health_mate/models/daily_forecast_model.dart';
-import 'package:health_mate/models/exercise_recommendation_model.dart';
-import 'package:health_mate/models/hourly_forecast_model.dart';
-import 'package:health_mate/models/weather_model.dart';
+import 'package:health_mate/models/weather/daily_forecast_model.dart';
+import 'package:health_mate/models/weather/exercise_recommendation_model.dart';
+import 'package:health_mate/models/weather/hourly_forecast_model.dart';
+import 'package:health_mate/models/weather/weather_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';

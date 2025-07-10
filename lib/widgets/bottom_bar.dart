@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_mate/screens/home_screen.dart';
-import 'package:health_mate/screens/activity_tracking_screen.dart';
+import 'package:health_mate/screens/activity/activity_tracking_screen.dart';
 import 'package:health_mate/screens/food_category/food_logging_screen.dart';
 import 'package:health_mate/screens/weather_screen.dart';
 

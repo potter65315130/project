@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:health_mate/models/food_entry_model.dart';
-import 'package:health_mate/models/food_item_model.dart';
+import 'package:health_mate/models/food/food_entry_model.dart';
+import 'package:health_mate/models/food/food_item_model.dart';
 import 'package:health_mate/models/running_session_model.dart';
 import 'package:intl/intl.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:health_mate/models/food_entry_model.dart';
+import 'package:health_mate/models/food/food_entry_model.dart';
 import 'package:health_mate/providers/home_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:health_mate/models/food_category_model.dart';
+import 'package:health_mate/models/food/food_category_model.dart';
 import 'package:health_mate/screens/food_category/food_item_list_screen.dart';
 
 // --- UI THEME CONSTANTS (ควร import มาจากที่เดียว) ---

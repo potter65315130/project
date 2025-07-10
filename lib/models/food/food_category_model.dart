@@ -1,4 +1,4 @@
-import 'package:health_mate/models/food_item_model.dart';
+import 'package:health_mate/models/food/food_item_model.dart';
 
 class FoodCategory {
   final String categoryName;

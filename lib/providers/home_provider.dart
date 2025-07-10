@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:health_mate/models/food_entry_model.dart';
+import 'package:health_mate/models/food/food_entry_model.dart';
 import 'package:health_mate/models/running_session_model.dart';
 import 'package:intl/intl.dart';
 
@@ -101,8 +101,6 @@ class HomeProvider with ChangeNotifier {
       await loadData(); // โหลดข้อมูลใหม่แม้จะเกิดข้อผิดพลาด
     }
   }
-  // ในไฟล์ home_provider.dart
-  // ใช้โค้ดนี้แทนเวอร์ชันเก่า
 
   Future<void> deleteFoodLog(FoodEntryModel entryToDelete) async {
     final uid = _auth.currentUser?.uid;

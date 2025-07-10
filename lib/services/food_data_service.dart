@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:health_mate/models/food_category_model.dart';
-import 'package:health_mate/models/food_item_model.dart';
+import 'package:health_mate/models/food/food_category_model.dart';
+import 'package:health_mate/models/food/food_item_model.dart';
 
 class FoodDataService {
   List<FoodCategory> _categories = [];
