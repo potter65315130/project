@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:health_mate/models/exercise_log_model.dart';
 import 'package:health_mate/models/food/food_entry_model.dart';
 import 'package:health_mate/models/food/food_item_model.dart';
 import 'package:health_mate/models/running_session_model.dart';
@@ -455,5 +456,50 @@ class FirestoreService {
     return _favoritesCollection(uid).snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => FoodItem.fromFirestore(doc)).toList();
     });
+  }
+
+  /// -------------------- บันทึกการออกกำลังกาย (ExerciseLog) --------------------
+
+  Future<void> logExercise(String uid, ExerciseLogModel log) async {
+    final todayId = DateFormat('yyyy-MM-dd').format(log.timestamp);
+    final questDocRef = _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyQuests')
+        .doc(todayId);
+
+    final exerciseLogRef = questDocRef.collection('exerciseLogs').doc();
+
+    await _firestore.runTransaction((transaction) async {
+      // 1. สร้าง log การออกกำลังกายใหม่
+      transaction.set(exerciseLogRef, log.toFirestore());
+
+      // 2. อัปเดตแคลอรี่ที่เผาผลาญในเควสรายวัน
+      transaction.update(questDocRef, {
+        'calorieBurned': FieldValue.increment(log.caloriesBurned),
+      });
+    });
+  }
+
+  /// -------------------- ดึงข้อมูลการออกกำลังกายย้อนหลัง --------------------
+
+  Stream<List<ExerciseLogModel>> getExerciseLogsStream(
+    String uid,
+    String date,
+  ) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyQuests')
+        .doc(date)
+        .collection('exerciseLogs')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => ExerciseLogModel.fromFirestore(doc))
+                  .toList(),
+        );
   }
 }
