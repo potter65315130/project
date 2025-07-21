@@ -68,19 +68,37 @@ class HomeScreen extends StatelessWidget {
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('บันทึกน้ำหนัก'),
+          backgroundColor: const Color(0xFF2D2D2D),
+          title: const Text(
+            'บันทึกน้ำหนัก',
+            style: TextStyle(color: Colors.white),
+          ),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text('กรุณาใส่น้ำหนักปัจจุบันของคุณ (กก.)'),
+                const Text(
+                  'กรุณาใส่น้ำหนักปัจจุบันของคุณ (กก.)',
+                  style: TextStyle(color: Colors.grey),
+                ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: weightController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey.shade600),
+                    ),
                     labelText: 'น้ำหนัก (กก.)',
+                    labelStyle: const TextStyle(color: Colors.grey),
                     suffixText: 'กก.',
+                    suffixStyle: const TextStyle(color: Colors.grey),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey.shade600),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF8BC34A)),
+                    ),
                   ),
                 ),
               ],
@@ -88,10 +106,14 @@ class HomeScreen extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('ยกเลิก'),
+              child: const Text('ยกเลิก', style: TextStyle(color: Colors.grey)),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8BC34A),
+                foregroundColor: Colors.white,
+              ),
               child: const Text('บันทึก'),
               onPressed: () async {
                 final newWeight = double.tryParse(weightController.text);
@@ -100,8 +122,12 @@ class HomeScreen extends StatelessWidget {
                   if (dialogContext.mounted) {
                     Navigator.of(dialogContext).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('บันทึกน้ำหนักเรียบร้อยแล้ว'),
+                      SnackBar(
+                        backgroundColor: const Color(0xFF8BC34A),
+                        content: const Text(
+                          'บันทึกน้ำหนักเรียบร้อยแล้ว',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     );
                   }
@@ -109,7 +135,11 @@ class HomeScreen extends StatelessWidget {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('กรุณาใส่น้ำหนักที่ถูกต้อง'),
+                        backgroundColor: Colors.red,
+                        content: Text(
+                          'กรุณาใส่น้ำหนักที่ถูกต้อง',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     );
                   }
@@ -137,17 +167,33 @@ class HomeScreen extends StatelessWidget {
     final quest = homeProvider.quest;
 
     if (homeProvider.isLoading && user == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: Color(0xFF1E1E1E),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF8BC34A),
+          ),
+        ),
+      );
     }
 
     if (user == null || quest == null) {
       return Scaffold(
+        backgroundColor: const Color(0xFF1E1E1E),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('ไม่สามารถโหลดข้อมูลได้'),
+              const Text(
+                'ไม่สามารถโหลดข้อมูลได้',
+                style: TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8BC34A),
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () => context.read<HomeProvider>().loadData(),
                 child: const Text('ลองอีกครั้ง'),
               ),
@@ -171,57 +217,94 @@ class HomeScreen extends StatelessWidget {
             : 0.0;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
-        title: const Text('Calorie Diary'),
-        backgroundColor: Colors.lightGreen,
+        title: const Text(
+          'Calorie Diary',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color(0xFF2D2D2D),
         foregroundColor: Colors.white,
+        elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: 'ประวัติ',
-            onPressed: () => _navigateToHistoryScreen(context, user),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.history, size: 20),
+              ),
+              tooltip: 'ประวัติ',
+              onPressed: () => _navigateToHistoryScreen(context, user),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'ออกจากระบบ',
-            onPressed: () => _logout(context),
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.logout, size: 20),
+              ),
+              tooltip: 'ออกจากระบบ',
+              onPressed: () => _logout(context),
+            ),
           ),
         ],
       ),
-      body:
-          homeProvider.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.lightGreen, Colors.white, Colors.white],
-                  ),
+      body: homeProvider.isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF8BC34A),
+              ),
+            )
+          : Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF2D2D2D), Color(0xFF1E1E1E)],
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Header Section - User Info
-                      const SizedBox(height: 24),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    
+                    // Main Card Container
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2D2D2D),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Weight Section with circular design
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF8BC34A), Color(0xFF689F38)],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            // Weight Section
-                            Row(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Column(
@@ -229,13 +312,18 @@ class HomeScreen extends StatelessWidget {
                                   children: [
                                     const Text(
                                       'น้ำหนักปัจจุบัน',
-                                      style: TextStyle(color: Colors.grey),
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
                                     ),
+                                    const SizedBox(height: 4),
                                     Text(
                                       '${weight.toStringAsFixed(1)} กก.',
                                       style: const TextStyle(
-                                        fontSize: 20,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
@@ -244,304 +332,404 @@ class HomeScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     const Text(
-                                      'น้ำหนักเป้าหมาย',
-                                      style: TextStyle(color: Colors.grey),
+                                      'เป้าหมาย',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
                                     ),
+                                    const SizedBox(height: 4),
                                     Text(
                                       '${targetWeight.toStringAsFixed(1)} กก.',
                                       style: const TextStyle(
-                                        fontSize: 20,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
                                 ),
-                                ElevatedButton(
-                                  onPressed:
-                                      () => _showUpdateWeightDialog(context),
-                                  child: const Text('อัปเดต'),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // BMI and BMR Info
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          'BMI',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          bmi.toStringAsFixed(1),
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          _getBMIStatus(bmi),
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          'BMR',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          bmr.toInt().toString(),
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Text(
-                                          'kcal/วัน',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          'เหลือ',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          daysLeft.toString(),
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Text(
-                                          'วัน',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
+                                  child: TextButton(
+                                    onPressed: () => _showUpdateWeightDialog(context),
+                                    child: const Text(
+                                      'อัปเดต',
+                                      style: TextStyle(color: Colors.white),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
+                          ),
 
-                            const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                            // Calorie Progress
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(12),
+                          // Stats Row with circular containers
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF3E3E3E),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.monitor_weight,
+                                          color: Colors.blue,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'BMI',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Text(
+                                        bmi.toStringAsFixed(1),
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        _getBMIStatus(bmi),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'แคลอรี่ที่เหลือ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey.shade600,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF3E3E3E),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color(0xFF8BC34A).withOpacity(0.3),
+                                      width: 1,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '${remainingCal.toInt()}',
-                                    style: TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          remainingCal >= 0
-                                              ? Colors.green
-                                              : Colors.red,
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF8BC34A).withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.local_fire_department,
+                                          color: Color(0xFF8BC34A),
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'BMR',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Text(
+                                        bmr.toInt().toString(),
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'kcal/วัน',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF3E3E3E),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.orange.withOpacity(0.3),
+                                      width: 1,
                                     ),
                                   ),
-                                  const Text(
-                                    'kcal',
-                                    style: TextStyle(color: Colors.grey),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.calendar_today,
+                                          color: Colors.orange,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'เหลือ',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Text(
+                                        daysLeft.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'วัน',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 12),
-                                  LinearProgressIndicator(
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Calorie Progress with circular design
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3E3E3E),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'แคลอรี่ที่เหลือ',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${remainingCal.toInt()}',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: remainingCal >= 0 
+                                        ? const Color(0xFF8BC34A)
+                                        : Colors.red,
+                                  ),
+                                ),
+                                const Text(
+                                  'kcal',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(3),
+                                    color: Colors.grey.shade700,
+                                  ),
+                                  child: LinearProgressIndicator(
                                     value: calorieProgress.clamp(0.0, 1.0),
-                                    backgroundColor: Colors.grey.shade300,
+                                    backgroundColor: Colors.transparent,
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                       calorieProgress > 1.0
                                           ? Colors.red
-                                          : Colors.blue,
+                                          : const Color(0xFF8BC34A),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // Food and Exercise Buttons
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap:
-                                        () => _navigateToAddCalories(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange.shade50,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.orange.shade200,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          const Text(
-                                            'แคลอรี่ได้รับจากอาหาร',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          const Icon(
-                                            Icons.restaurant,
-                                            color: Colors.orange,
-                                            size: 24,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${intake.toInt()}',
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.orange,
-                                            ),
-                                          ),
-                                          const Text(
-                                            'kcal',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap:
-                                        () => _navigateToBurnCalories(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green.shade50,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.green.shade200,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          const Text(
-                                            'เผาผลาญจากการออกกำลังกาย',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          const Icon(
-                                            Icons.fitness_center,
-                                            color: Colors.green,
-                                            size: 24,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${burned.toInt()}',
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.green,
-                                            ),
-                                          ),
-                                          const Text(
-                                            'kcal',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
 
-                      const SizedBox(height: 80),
-                    ],
-                  ),
+                          const SizedBox(height: 24),
+
+                          // Action Buttons with modern circular design
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _navigateToAddCalories(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [Colors.orange, Color(0xFFFF8A50)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.orange.withOpacity(0.3),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.restaurant,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        const Text(
+                                          'อาหาร',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '${intake.toInt()}',
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const Text(
+                                          'kcal',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _navigateToBurnCalories(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF8BC34A), Color(0xFF689F38)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF8BC34A).withOpacity(0.3),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.fitness_center,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        const Text(
+                                          'ออกกำลังกาย',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '${burned.toInt()}',
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const Text(
+                                          'kcal',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
+            ),
     );
   }
 }
