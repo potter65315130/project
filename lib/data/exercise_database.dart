@@ -32,8 +32,7 @@ class ExerciseDatabase {
       id: 'push_ups',
       name: 'Push-ups',
       category: ExerciseCategory.weightTraining,
-      lottieAssetPath:
-          'assets/lottie/dumbbell_press.json', // ต้องมีไฟล์ Lottie ที่ตรงกัน
+      lottieAssetPath: 'assets/lottie/Push_ups.json',
       calculationStrategy: RepBasedBodyweightStrategy(),
       // วิดพื้นจะใช้แรงจากแขนและอกในการดันลำตัวส่วนบนขึ้น
       // ซึ่งคิดเป็นประมาณ 65% ของน้ำหนักตัว
