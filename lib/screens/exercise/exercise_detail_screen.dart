@@ -51,7 +51,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
   }
 
   void _logExercise() {
-    // ... (ส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     final user = Provider.of<HomeProvider>(context, listen: false).user;
     final exerciseProvider = Provider.of<ExerciseProvider>(
       context,
@@ -60,9 +59,12 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (user == null || uid == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('ไม่พบข้อมูลผู้ใช้')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ไม่พบข้อมูลผู้ใช้'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -101,32 +103,50 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
               content: Text(
                 'บันทึกสำเร็จ! เผาผลาญไป ${caloriesBurned.toStringAsFixed(1)} แคลอรี่',
               ),
+              backgroundColor: const Color(0xFF9ACD32),
             ),
           );
           Navigator.pop(context); // Go back to the list
         })
         .catchError((error) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $error')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('เกิดข้อผิดพลาด: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
         });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.exercise.name)),
+      backgroundColor: const Color(0xFF1A1A1A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1A1A1A),
+        elevation: 0,
+        title: Text(
+          widget.exercise.name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ... (Lottie Animation และปุ่มควบคุมเหมือนเดิม)
+            // Lottie Animation
             Container(
               height: 250,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: const Color(0xFF2A2A2A),
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF3A3A3A), width: 1),
               ),
               child: Lottie.asset(
                 widget.exercise.lottieAssetPath,
@@ -137,38 +157,71 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
               ),
             ),
             const SizedBox(height: 16),
+
+            // Control buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
                   onPressed: () => _lottieController.repeat(),
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('เริ่ม'),
+                  icon: const Icon(Icons.play_arrow, color: Colors.black),
+                  label: const Text(
+                    'เริ่ม',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF9ACD32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _lottieController.stop(),
-                  icon: const Icon(Icons.stop),
-                  label: const Text('หยุด'),
+                  icon: const Icon(Icons.stop, color: Colors.white),
+                  label: const Text(
+                    'หยุด',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2A2A2A),
+                    side: const BorderSide(color: Color(0xFF3A3A3A)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 16),
 
-            // --- ส่วนที่ปรับปรุง ---
-            // ใช้ฟังก์ชันใหม่ในการสร้างฟอร์มตาม Strategy
+            // Divider
+            Container(height: 1, color: const Color(0xFF3A3A3A)),
+            const SizedBox(height: 24),
+
+            // Input fields
             _buildInputFields(),
 
             const SizedBox(height: 32),
+
             // Log Button
             ElevatedButton(
               onPressed: _logExercise,
               style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF9ACD32),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 textStyle: const TextStyle(fontSize: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('บันทึกการออกกำลังกาย'),
+              child: const Text(
+                'บันทึกการออกกำลังกาย',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
@@ -203,40 +256,42 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
     }
     // กรณีอื่นๆ (ถ้ามี)
     else {
-      return const Center(child: Text('ไม่รองรับการบันทึกสำหรับท่านี้'));
+      return const Center(
+        child: Text(
+          'ไม่รองรับการบันทึกสำหรับท่านี้',
+          style: TextStyle(color: Colors.white54),
+        ),
+      );
     }
   }
 
   // ฟอร์มสำหรับ Weight Training (ใช้น้ำหนัก)
   List<Widget> _buildWeightTrainingFields() {
     return [
-      Text('กรอกข้อมูล:', style: Theme.of(context).textTheme.titleLarge),
+      Text(
+        'กรอกข้อมูล:',
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       const SizedBox(height: 16),
-      TextField(
+      _buildTextField(
         controller: _weightController,
+        label: 'น้ำหนักที่ยก (kg)',
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: const InputDecoration(
-          labelText: 'น้ำหนักที่ยก (kg)',
-          border: OutlineInputBorder(),
-        ),
       ),
       const SizedBox(height: 16),
-      TextField(
+      _buildTextField(
         controller: _setsController,
+        label: 'จำนวนเซ็ต',
         keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          labelText: 'จำนวนเซ็ต',
-          border: OutlineInputBorder(),
-        ),
       ),
       const SizedBox(height: 16),
-      TextField(
+      _buildTextField(
         controller: _repsController,
+        label: 'จำนวนครั้ง / เซ็ต',
         keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          labelText: 'จำนวนครั้ง / เซ็ต',
-          border: OutlineInputBorder(),
-        ),
       ),
     ];
   }
@@ -244,25 +299,24 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
   /// **ฟอร์มใหม่:** สำหรับ Bodyweight (ไม่มีช่องกรอกน้ำหนัก)
   List<Widget> _buildBodyweightFields() {
     return [
-      Text('กรอกข้อมูล:', style: Theme.of(context).textTheme.titleLarge),
-      const SizedBox(height: 16),
-      // --- ไม่มีช่องกรอกน้ำหนัก ---
-      TextField(
-        controller: _setsController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          labelText: 'จำนวนเซ็ต',
-          border: OutlineInputBorder(),
+      Text(
+        'กรอกข้อมูล:',
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
         ),
       ),
       const SizedBox(height: 16),
-      TextField(
-        controller: _repsController,
+      _buildTextField(
+        controller: _setsController,
+        label: 'จำนวนเซ็ต',
         keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          labelText: 'จำนวนครั้ง / เซ็ต',
-          border: OutlineInputBorder(),
-        ),
+      ),
+      const SizedBox(height: 16),
+      _buildTextField(
+        controller: _repsController,
+        label: 'จำนวนครั้ง / เซ็ต',
+        keyboardType: TextInputType.number,
       ),
     ];
   }
@@ -270,16 +324,49 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
   // ฟอร์มสำหรับ Cardio
   List<Widget> _buildCardioFields() {
     return [
-      Text('กรอกข้อมูล:', style: Theme.of(context).textTheme.titleLarge),
-      const SizedBox(height: 16),
-      TextField(
-        controller: _durationController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          labelText: 'ระยะเวลา (นาที)',
-          border: OutlineInputBorder(),
+      Text(
+        'กรอกข้อมูล:',
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
         ),
       ),
+      const SizedBox(height: 16),
+      _buildTextField(
+        controller: _durationController,
+        label: 'ระยะเวลา (นาที)',
+        keyboardType: TextInputType.number,
+      ),
     ];
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required TextInputType keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white54),
+        filled: true,
+        fillColor: const Color(0xFF2A2A2A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF9ACD32)),
+        ),
+      ),
+    );
   }
 }

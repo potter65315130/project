@@ -38,9 +38,23 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
     return DefaultTabController(
       length: 2, // 2 tabs: ค้นหา, รายการของฉัน
       child: Scaffold(
+        backgroundColor: const Color(0xFF1A1A1A),
         appBar: AppBar(
-          title: Text(widget.title),
+          backgroundColor: const Color(0xFF1A1A1A),
+          elevation: 0,
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          iconTheme: const IconThemeData(color: Colors.white),
           bottom: const TabBar(
+            indicatorColor: Color(0xFF9ACD32),
+            labelColor: Color(0xFF9ACD32),
+            unselectedLabelColor: Colors.white54,
             tabs: [Tab(text: 'ค้นหา'), Tab(text: 'รายการของฉัน (วันนี้)')],
           ),
         ),
@@ -67,11 +81,27 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                 onChanged: (value) {
                   provider.filterExercises(widget.category, query: value);
                 },
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   labelText: 'ค้นหาจากชื่อ..',
-                  prefixIcon: const Icon(Icons.search),
+                  labelStyle: const TextStyle(color: Colors.white54),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color(0xFF9ACD32),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFF2A2A2A),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Color(0xFF9ACD32)),
                   ),
                 ),
               ),
@@ -81,20 +111,54 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                 itemCount: provider.filteredExercises.length,
                 itemBuilder: (context, index) {
                   final exercise = provider.filteredExercises[index];
-                  return ListTile(
-                    leading: const Icon(Icons.fitness_center),
-                    title: Text(exercise.name),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  ExerciseDetailScreen(exercise: exercise),
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF3A3A3A),
+                        width: 1,
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF9ACD32),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      );
-                    },
+                        child: const Icon(
+                          Icons.fitness_center,
+                          color: Colors.black,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        exercise.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: Colors.white54,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    ExerciseDetailScreen(exercise: exercise),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -106,12 +170,11 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
   }
 
   Widget _buildMyItemsTab() {
-    // TODO: Implement this tab to show ExerciseLogModel for today
-    // You would use the getExerciseLogsStream from FirestoreService here
-    // and listen to it with a StreamBuilder.
     return const Center(
       child: Text(
         'ส่วนนี้จะแสดงรายการที่บันทึกไว้ของวันนี้\n(ดูโค้ดเพิ่มเติมใน FirestoreService)',
+        style: TextStyle(color: Colors.white54, fontSize: 16),
+        textAlign: TextAlign.center,
       ),
     );
   }
