@@ -46,7 +46,6 @@ class RepBasedWeightedStrategy extends CalorieCalculationStrategy {
 
   @override
   double calculate(CalculationParams params) {
-    // สามารถปรับปรุงสูตรให้แม่นยำขึ้นได้ในอนาคต เช่น Compendium of Physical Activities
     // สูตรพื้นฐาน: Sets * Reps * Weight (kg) * Factor
     // Factor 0.035 เป็นค่าประมาณ อาจปรับเปลี่ยนได้ตามงานวิจัย
     if (params.weightLifted <= 0) return 0; // ป้องกันการคำนวณที่ผิดพลาด
