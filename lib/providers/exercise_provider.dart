@@ -1,5 +1,3 @@
-// providers/exercise_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:health_mate/data/exercise_database.dart';
 import 'package:health_mate/models/exercise_log_model.dart';
@@ -17,7 +15,6 @@ class ExerciseProvider with ChangeNotifier {
   List<Exercise> get filteredExercises => _filteredExercises;
 
   void filterExercises(ExerciseCategory category, {String? query}) {
-    // ... (ส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     _searchQuery = query ?? _searchQuery;
     _filteredExercises =
         _allExercises.where((ex) {
@@ -29,6 +26,21 @@ class ExerciseProvider with ChangeNotifier {
         }).toList();
     notifyListeners();
   }
+
+  // --- ADDED METHOD ---
+  /// ค้นหาท่าออกกำลังกายจากชื่อที่ระบุ
+  /// ใช้ในหน้า 'รายการของฉัน' เพื่อดึงข้อมูลสำหรับหน้า Detail
+  Exercise? findExerciseByName(String name) {
+    try {
+      // ค้นหาท่าออกกำลังกายตัวแรกใน List _allExercises ที่มีชื่อตรงกัน
+      return _allExercises.firstWhere((exercise) => exercise.name == name);
+    } catch (e) {
+      // ถ้าใช้ firstWhere แล้วหาไม่เจอ จะเกิด Error,
+      // เราใช้ try-catch ดักไว้ และ return null แทนเพื่อไม่ให้แอปพัง
+      return null;
+    }
+  }
+  // --------------------
 
   /// ฟังก์ชันคำนวณแคลอรี่ที่เรียกใช้ Strategy ที่เหมาะสม
   double calculateCalories({
@@ -61,7 +73,6 @@ class ExerciseProvider with ChangeNotifier {
     int reps = 0,
     double weight = 0,
   }) async {
-    // ... (ส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     final log = ExerciseLogModel(
       exerciseId: exercise.id,
       exerciseName: exercise.name,

@@ -294,8 +294,6 @@ class FirestoreService {
     });
   }
 
-  // --- MODIFIED: แก้ไข Stream เพื่อให้แน่ใจว่า ID ของเอกสารถูกดึงมาด้วย ---
-  // ID นี้สำคัญมากสำหรับฟังก์ชันการลบข้อมูล
   Stream<List<FoodEntryModel>> getFoodEntriesStream(String uid, String date) {
     return _firestore
         .collection('users')
@@ -308,21 +306,16 @@ class FirestoreService {
         .map(
           (snapshot) =>
               snapshot.docs.map((doc) {
-                // ส่วนนี้ตั้งสมมติฐานว่า FoodEntryModel.fromFirestore(doc) ของคุณ
-                // สามารถดึง ID จาก DocumentSnapshot ได้แล้ว (เช่น id: doc.id)
                 return FoodEntryModel.fromFirestore(doc);
               }).toList(),
         );
   }
 
-  // --- ADDED: เพิ่มฟังก์ชันสำหรับลบรายการอาหาร ---
-  // ใช้ Transaction เพื่อลบรายการอาหารและอัปเดตแคลอรี่รวมในคราวเดียว
   Future<void> deleteFoodEntry(
     String uid,
     String date,
     FoodEntryModel entry,
   ) async {
-    // ตรวจสอบให้แน่ใจว่า entry object มี ID ของเอกสาร
     if (entry.id == null) {
       if (kDebugMode) {
         print('Error: ไม่สามารถลบรายการได้เนื่องจากไม่มี ID');
@@ -338,14 +331,11 @@ class FirestoreService {
 
     final foodEntryDocRef = questDocRef.collection('foodEntries').doc(entry.id);
 
-    // ใช้ Transaction เพื่อให้แน่ใจว่าการทำงานทั้งสองอย่าง (ลบและอัปเดต) สำเร็จไปด้วยกัน
     await _firestore.runTransaction((transaction) async {
-      // 1. อัปเดต calorieIntake ในเควสรายวัน (ลบออก)
       transaction.update(questDocRef, {
         'calorieIntake': FieldValue.increment(-entry.calories),
       });
 
-      // 2. ลบเอกสารของรายการอาหารนั้นๆ
       transaction.delete(foodEntryDocRef);
     });
   }
@@ -478,6 +468,41 @@ class FirestoreService {
       transaction.update(questDocRef, {
         'calorieBurned': FieldValue.increment(log.caloriesBurned),
       });
+    });
+  }
+
+  // --- ADDED: เพิ่มฟังก์ชันสำหรับลบรายการออกกำลังกาย ---
+  // ใช้ Transaction เพื่อลบ Log และอัปเดตแคลอรี่รวมในคราวเดียว
+  Future<void> deleteExerciseLog(
+    String uid,
+    String date,
+    ExerciseLogModel log,
+  ) async {
+    // ตรวจสอบให้แน่ใจว่า log object มี ID ของเอกสาร
+    if (log.id == null) {
+      if (kDebugMode) {
+        print('Error: ไม่สามารถลบรายการได้เนื่องจากไม่มี ID');
+      }
+      return;
+    }
+
+    final questDocRef = _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyQuests')
+        .doc(date);
+
+    final exerciseLogRef = questDocRef.collection('exerciseLogs').doc(log.id);
+
+    // ใช้ Transaction เพื่อให้แน่ใจว่าการทำงานทั้งสองอย่างสำเร็จไปด้วยกัน
+    await _firestore.runTransaction((transaction) async {
+      // 1. อัปเดต calorieBurned ในเควสรายวัน (ลบออก)
+      transaction.update(questDocRef, {
+        'calorieBurned': FieldValue.increment(-log.caloriesBurned),
+      });
+
+      // 2. ลบเอกสารของรายการออกกำลังกายนั้นๆ
+      transaction.delete(exerciseLogRef);
     });
   }
 
