@@ -26,7 +26,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   // ฟังก์ชันแนะนำการออกกำลังกาย
   Map<String, dynamic> getExerciseRecommendation() {
-    if (weatherData == null) return {'icon': '🤷‍♂️', 'title': 'ไม่มีข้อมูล', 'description': '', 'color': Colors.grey};
+    if (weatherData == null) return {'icon': '🤷‍♂️', 'title': 'ไม่มีข้อมูล', 'description': '', 'color': const Color(0xFF424242)};
 
     double temp = (weatherData!['main']['temp'] as num).toDouble();
     double humidity = (weatherData!['main']['humidity'] as num).toDouble();
@@ -38,7 +38,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'icon': '🏠',
         'title': 'ออกกำลังกายในร้ม',
         'description': 'วันนี้ฝนตก แนะนำ: โยคะ ยืดเส้นยืดสาย หรือออกกำลังกายในร่ม',
-        'color': const Color(0xFF64B5F6),
+        'color': const Color(0xFF5C6BC0),
         'level': 'medium'
       };
     }
@@ -48,7 +48,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'icon': '🥵',
         'title': 'อากาศร้อนจัด - หลีกเลี่ยง',
         'description': 'อุณหภูมิสูงมาก แนะนำ: พักผ่อน ดื่มน้ำเยอะๆ หรือออกกำลังกายในแอร์',
-        'color': const Color(0xFFEF5350),
+        'color': const Color(0xFFE53935),
         'level': 'low'
       };
     }
@@ -58,7 +58,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'icon': '🥶',
         'title': 'อากาศเย็น - ระวังตัว',
         'description': 'อุณหภูมิต่ำ แนะนำ: วอร์มอัพนานๆ ใส่เสื้อกันหนาว วิ่งเบาๆ',
-        'color': const Color(0xFF42A5F5),
+        'color': const Color(0xFF5C6BC0),
         'level': 'medium'
       };
     }
@@ -68,7 +68,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'icon': '💦',
         'title': 'อากาศชื้น - ออกกำลังกายเบาๆ',
         'description': 'ความชื้นสูง แนะนำ: เดิน จ๊อกกิ้งเบาๆ ดื่มน้ำบ่อยๆ หลีกเลี่ยงออกแรงหนัก',
-        'color': const Color(0xFF4DB6AC),
+        'color': const Color(0xFF66BB6A),
         'level': 'medium'
       };
     }
@@ -78,7 +78,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'icon': '🏃‍♂️',
         'title': 'สภาพอากาศเหมาะมาก!',
         'description': 'วันนี้เหมาะออกกำลังกาย: วิ่ง ปั่นจักรยาน ฟุตบอล หรือกีฬากลางแจ้ง',
-        'color': const Color(0xFF66BB6A),
+        'color': const Color(0xFF8BC34A),
         'level': 'high'
       };
     }
@@ -88,7 +88,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'icon': '🚶‍♂️',
         'title': 'เหมาะออกกำลังกายปานกลาง',
         'description': 'สภาพอากาศดี แนะนำ: เดิน จ๊อกกิ้ง โยคะกลางแจ้ง หรือขี่จักรยาน',
-        'color': const Color(0xFFFFB74D),
+        'color': const Color(0xFFCDDC39),
         'level': 'medium'
       };
     }
@@ -97,17 +97,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
       'icon': '🤔',
       'title': 'พิจารณาด้วยตัวเอง',
       'description': 'สภาพอากาศปกติ ดูอาการร่างกายแล้วตัดสินใจเอง',
-      'color': const Color(0xFFBDBDBD),
+      'color': const Color(0xFF616161),
       'level': 'medium'
     };
-  }
-
-  Color getTemperatureColor(double temp) {
-    if (temp < 15) return Colors.blue;
-    if (temp < 25) return Colors.green;
-    if (temp < 30) return Colors.orange;
-    if (temp < 35) return Colors.red;
-    return Colors.red;
   }
 
   String getWeatherIcon(String weatherMain) {
@@ -184,24 +176,30 @@ class _WeatherScreenState extends State<WeatherScreen> {
     final recommendation = getExerciseRecommendation();
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFF1C1C1C), // Dark background
       appBar: AppBar(
         title: const Text(
-          "สภาพอากาศ & การออกกำลังกาย",
-          style: TextStyle(fontWeight: FontWeight.w600),
+          "สภาพอากาศวันนี้ ",
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF1E88E5),
+        backgroundColor: const Color(0xFF1C1C1C),
         foregroundColor: Colors.white,
         elevation: 0,
+        centerTitle: false,
       ),
       body: isLoading
           ? const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(
+                    color: Color(0xFF8BC34A),
+                  ),
                   SizedBox(height: 20),
-                  Text("กำลังโหลดข้อมูล...", style: TextStyle(fontSize: 16)),
+                  Text(
+                    "กำลังโหลดข้อมูล...", 
+                    style: TextStyle(fontSize: 16, color: Colors.white70)
+                  ),
                 ],
               ),
             )
@@ -210,11 +208,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 60, color: Color(0xFFEF5350)),
+                      Icon(Icons.error_outline, size: 60, color: Color(0xFFE53935)),
                       const SizedBox(height: 16),
                       Text(
                         errorMessage,
-                        style: const TextStyle(fontSize: 16, color: Color(0xFFD32F2F)),
+                        style: const TextStyle(fontSize: 16, color: Color(0xFFE53935)),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
@@ -223,8 +221,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         icon: const Icon(Icons.refresh),
                         label: const Text("ลองอีกครั้ง"),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E88E5),
-                          foregroundColor: Colors.white,
+                          backgroundColor: const Color(0xFF8BC34A),
+                          foregroundColor: Colors.black,
                         ),
                       ),
                     ],
@@ -233,6 +231,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
               : weatherData != null
                   ? RefreshIndicator(
                       onRefresh: _loadWeatherData,
+                      color: const Color(0xFF8BC34A),
+                      backgroundColor: const Color(0xFF2C2C2C),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(16),
@@ -244,14 +244,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF42A5F5), Color(0xFF1E88E5)],
+                                  colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFF8BC34A), width: 1),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: const Color(0xFF8BC34A).withOpacity(0.2),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -261,7 +262,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.location_on, color: Colors.white, size: 20),
+                                      const Icon(Icons.location_on, color: Color(0xFF8BC34A), size: 20),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
@@ -293,7 +294,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                             style: const TextStyle(
                                               fontSize: 36,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                              color: Color(0xFF8BC34A),
                                             ),
                                           ),
                                           Text(
@@ -317,11 +318,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: const Color(0xFF2C2C2C),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFF424242), width: 1),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withOpacity(0.3),
                                     blurRadius: 10,
                                     offset: const Offset(0, 2),
                                   ),
@@ -335,7 +337,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   const SizedBox(height: 16),
@@ -383,29 +385,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               width: double.infinity,
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: recommendation['color'],
+                                color: const Color(0xFF2C2C2C),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: recommendation['color'], width: 2),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
+                                    color: (recommendation['color'] as Color).withOpacity(0.3),
+                                    blurRadius: 15,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
                               child: Column(
                                 children: [
-                                  Text(
-                                    recommendation['icon'],
-                                    style: const TextStyle(fontSize: 40),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: (recommendation['color'] as Color).withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(50),
+                                    ),
+                                    child: Text(
+                                      recommendation['icon'],
+                                      style: const TextStyle(fontSize: 32),
+                                    ),
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
                                     recommendation['title'],
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: recommendation['color'],
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -421,16 +431,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: recommendation['color'],
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       recommendation['level'] == 'high' ? "แนะนำสูง" :
                                       recommendation['level'] == 'medium' ? "แนะนำปานกลาง" : "ไม่แนะนำ",
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: Colors.black,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -447,18 +457,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               width: double.infinity,
                               child: ElevatedButton.icon(
                                 onPressed: _loadWeatherData,
-                                icon: const Icon(Icons.refresh),
+                                icon: const Icon(Icons.refresh, color: Colors.black),
                                 label: const Text(
                                   "รีเฟรชข้อมูล",
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E88E5),
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: const Color(0xFF8BC34A),
+                                  foregroundColor: Colors.black,
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
+                                  elevation: 5,
                                 ),
                               ),
                             ),
@@ -469,39 +480,47 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               "ดึงข้อมูลเมื่อ: ${DateTime.now().toString().substring(0, 16)}",
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: Colors.grey.shade500,
                               ),
                             ),
                           ],
                         ),
                       ),
                     )
-                  : const Center(child: Text("ไม่มีข้อมูล")),
+                  : const Center(child: Text("ไม่มีข้อมูล", style: TextStyle(color: Colors.white))),
     );
   }
 
   Widget _buildWeatherDetail(String icon, String label, String value) {
-    return Column(
-      children: [
-        Text(icon, style: const TextStyle(fontSize: 20)),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C1C1C),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF424242), width: 1),
+      ),
+      child: Column(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white54,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF8BC34A),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
