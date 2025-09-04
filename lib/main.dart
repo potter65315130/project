@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_mate/providers/exercise_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart'; // <-- 1. เพิ่มบรรทัดนี้
 
 // นำเข้าหน้าจอ
 import 'package:health_mate/screens/login_screen.dart';
@@ -17,7 +18,8 @@ import 'package:health_mate/models/user_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // รอให้ระบบพร้อม
   await Firebase.initializeApp(); // เริ่มต้น Firebase
-  runApp(MyApp());
+  await initializeDateFormatting('th', null); // <-- 2. เพิ่มบรรทัดนี้
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Health Mate',
         debugShowCheckedModeBanner: false,
-        home: AuthWrapper(), // ตรวจสอบสถานะผู้ใช้
+        home: const AuthWrapper(), // ตรวจสอบสถานะผู้ใช้
       ),
     );
   }
