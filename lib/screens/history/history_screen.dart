@@ -60,36 +60,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
     } catch (e) {
       if (kDebugMode) print('Error loading last 30 days: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล')),
+        SnackBar(
+          content: const Text('เกิดข้อผิดพลาดในการโหลดข้อมูล'),
+          backgroundColor: Colors.grey[800],
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _selectDateRange() async {
+  Future<void> _selectSingleDate() async {
     final now = DateTime.now();
-    final dateRange = await showDateRangePicker(
+    final selectedDate = await showDatePicker(
       context: context,
+      initialDate: now,
       firstDate: DateTime(now.year - 5),
       lastDate: now,
-      initialDateRange: DateTimeRange(
-        start: now.subtract(const Duration(days: 30)),
-        end: now,
-      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF9CCC65),
+              surface: Color(0xFF2A2A2A),
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
-    if (dateRange != null) {
-      await _loadDataForDateRange(dateRange.start, dateRange.end);
+    if (selectedDate != null) {
+      await _loadDataForSingleDate(selectedDate);
     }
   }
 
-  Future<void> _loadDataForDateRange(DateTime start, DateTime end) async {
+  Future<void> _loadDataForSingleDate(DateTime selectedDate) async {
     setState(() {
       _isLoading = true;
-      final formatter = DateFormat('d MMM y', 'th');
-      _headerText =
-          'ข้อมูลวันที่ ${formatter.format(start)} - ${formatter.format(end)}';
+      final formatter = DateFormat('EEEE, d MMMM y', 'th');
+      _headerText = 'ข้อมูลวันที่ ${formatter.format(selectedDate)}';
     });
 
     final uid = _auth.currentUser?.uid;
@@ -99,19 +110,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     try {
+      // โหลดข้อมูลเฉพาะวันที่เลือก
       final data = await _firestoreService.getQuestHistoryForDateRange(
         uid,
-        start,
-        end,
+        selectedDate,
+        selectedDate,
       );
       setState(() {
         _historyData = data;
       });
     } catch (e) {
-      if (kDebugMode) print('Error loading date range: $e');
+      if (kDebugMode) print('Error loading single date: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูลตามช่วงเวลา'),
+        SnackBar(
+          content: const Text('เกิดข้อผิดพลาดในการโหลดข้อมูลวันที่เลือก'),
+          backgroundColor: Colors.grey[800],
         ),
       );
     } finally {
@@ -119,18 +132,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  // เพิ่มฟังก์ชันสำหรับกลับไปดูข้อมูล 30 วันล่าสุด
+  void _resetToLast30Days() {
+    _loadLast30Days();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
         title: const Text('ประวัติ'),
-        backgroundColor: Colors.blue.shade300,
+        backgroundColor: const Color(0xFF2A2A2A),
         foregroundColor: Colors.white,
         actions: [
+          // ปุ่มเลือกวันที่
           IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: 'เลือกช่วงเวลา',
-            onPressed: _selectDateRange,
+            icon: const Icon(Icons.calendar_today),
+            tooltip: 'เลือกวันที่',
+            onPressed: _selectSingleDate,
+          ),
+          // ปุ่มกลับไปดูข้อมูล 30 วันล่าสุด
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'ดูข้อมูล 30 วันล่าสุด',
+            onPressed: _resetToLast30Days,
           ),
         ],
       ),
@@ -140,27 +166,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               _headerText,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
           Expanded(
             child:
                 _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9CCC65)),
+                        ),
+                      )
                     : _historyData.isEmpty
-                    ? const Center(child: Text('ไม่พบข้อมูลในข่วงเวลานี้'))
+                    ? const Center(
+                        child: Text(
+                          'ไม่พบข้อมูลในช่วงเวลานี้',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
                     : ListView.builder(
                       itemCount: _historyData.length,
                       itemBuilder: (context, index) {
                         final quest = _historyData[index];
                         final netColor =
-                            quest.netCalorie > 0 ? Colors.green : Colors.red;
+                            quest.netCalorie > 0 ? const Color(0xFF9CCC65) : Colors.red;
 
                         return Card(
                           margin: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 6,
                           ),
+                          color: const Color(0xFF2A2A2A),
                           elevation: 2,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -183,10 +223,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               ).format(quest.date),
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
+                                color: Colors.white,
                               ),
                             ),
                             subtitle: Text(
                               'ได้รับ: ${quest.calorieIntake.toInt()} kcal | เผาผลาญ: ${quest.calorieBurned.toInt()} kcal',
+                              style: TextStyle(color: Colors.grey[300]),
                             ),
                             trailing: Text(
                               '${quest.netCalorie.toInt()}',
