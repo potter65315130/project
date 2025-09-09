@@ -36,7 +36,37 @@ class FirestoreService {
     final lost = (current > target) ? (current - target) : 0;
     return (lost / totalDiff) * 100;
   }
+// lib/services/firestore_service.dart
 
+// ... โค้ดที่มีอยู่แล้ว ...
+
+  /// -------------------- ดึงข้อมูลเควสรายวันย้อนหลัง (Stream) --------------------
+  Stream<List<DailyQuestModel>> getQuestHistoryStream(String uid, int days) {
+    final endDate = DateTime.now();
+    final startDate = endDate.subtract(Duration(days: days));
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    final end = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      23,
+      59,
+      59,
+    );
+
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyQuests')
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
+        .orderBy('date', descending: false) // เรียงจากเก่าไปใหม่
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => DailyQuestModel.fromFirestore(doc)).toList(),
+        );
+  }
   /// -------------------- เควสรายวัน --------------------
 
   Future<DailyQuestModel> fetchOrCreateTodayQuest(
@@ -528,3 +558,4 @@ class FirestoreService {
         );
   }
 }
+ 
