@@ -5,11 +5,9 @@ import 'package:health_mate/screens/activity_tracking_screen.dart';
 import 'package:health_mate/screens/food_category/food_logging_screen.dart';
 import 'package:health_mate/screens/weather_screen.dart';
 
-// --- UI THEME CONSTANTS ---
 const Color _darkBgColor = Color(0xFF121212);
 const Color _accentColor = Color(0xFFB4F82B);
 const Color _mediumTextColor = Color(0xFFB0B0B0);
-// --- END UI THEME CONSTANTS ---
 
 class BottomBar extends StatefulWidget {
   const BottomBar({super.key});
@@ -24,7 +22,6 @@ class _BottomBarState extends State<BottomBar>
   AnimationController? _animationController;
   Animation<double>? _animation;
 
-  // The screens remain the same
   final List<Widget> _screens = [
     HomeScreen(),
     ExerciseMainScreen(),
@@ -51,7 +48,7 @@ class _BottomBarState extends State<BottomBar>
   }
 
   void _onItemTapped(int index) {
-    if (_currentIndex == index) return; // Do nothing if the same tab is tapped
+    if (_currentIndex == index) return;
     setState(() {
       _currentIndex = index;
     });
@@ -64,17 +61,15 @@ class _BottomBarState extends State<BottomBar>
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_currentIndex],
-      // UI MODIFICATION: Applying the dark theme to the BottomNavigationBar
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: _darkBgColor, // Set dark background color
+        backgroundColor: _darkBgColor,
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
-        selectedItemColor: _accentColor, // Set accent color for selected item
-        unselectedItemColor:
-            _mediumTextColor, // Set grey color for unselected items
+        selectedItemColor: _accentColor,
+        unselectedItemColor: _mediumTextColor,
         enableFeedback: false,
-        showUnselectedLabels: true, // Ensure labels are always visible
+        showUnselectedLabels: true,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
         items: [
           _buildBottomNavigationBarItem(
@@ -102,7 +97,6 @@ class _BottomBarState extends State<BottomBar>
     );
   }
 
-  // No changes needed for the animation logic
   BottomNavigationBarItem _buildBottomNavigationBarItem({
     required IconData icon,
     required String label,

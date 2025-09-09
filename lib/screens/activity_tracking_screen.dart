@@ -18,15 +18,12 @@ class ActivityTrackingScreen extends StatefulWidget {
 class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   final MapController _mapController = MapController();
 
-  // Location related
   Position? _currentPosition;
 
-  // Tracking related
   bool _isTracking = false;
   StreamSubscription<Position>? _positionStream;
   Timer? _timer;
 
-  // Data
   final List<LatLng> _routePoints = [];
   double _distance = 0.0;
   Duration _duration = Duration.zero;

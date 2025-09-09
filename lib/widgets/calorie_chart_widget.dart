@@ -1,4 +1,3 @@
-// lib/widgets/calorie_chart_widget.dart
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -44,16 +43,10 @@ class CalorieChartWidget extends StatelessWidget {
               show: true,
               drawVerticalLine: true,
               getDrawingHorizontalLine: (value) {
-                return const FlLine(
-                  color: Color(0xff37434d),
-                  strokeWidth: 1,
-                );
+                return const FlLine(color: Color(0xff37434d), strokeWidth: 1);
               },
               getDrawingVerticalLine: (value) {
-                return const FlLine(
-                  color: Color(0xff37434d),
-                  strokeWidth: 1,
-                );
+                return const FlLine(color: Color(0xff37434d), strokeWidth: 1);
               },
             ),
             titlesData: FlTitlesData(
@@ -66,15 +59,15 @@ class CalorieChartWidget extends StatelessWidget {
                     final index = value.toInt();
                     return index < dayLabels.length
                         ? Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              dayLabels[index]!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            dayLabels[index]!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
                             ),
-                          )
+                          ),
+                        )
                         : const Text('');
                   },
                 ),
@@ -86,10 +79,7 @@ class CalorieChartWidget extends StatelessWidget {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       value.toInt().toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                     );
                   },
                 ),
@@ -106,11 +96,12 @@ class CalorieChartWidget extends StatelessWidget {
               border: Border.all(color: const Color(0xff37434d), width: 1),
             ),
             minX: 0,
-            maxX: spots.length > 0 ? spots.length - 1.toDouble() : 0,
+            maxX: spots.isNotEmpty ? spots.length - 1.toDouble() : 0,
             minY: 0,
-            maxY: quests.isNotEmpty
-                ? quests.map((q) => q.calorieIntake).reduce(max) * 1.2
-                : 100,
+            maxY:
+                quests.isNotEmpty
+                    ? quests.map((q) => q.calorieIntake).reduce(max) * 1.2
+                    : 100,
             lineBarsData: [
               LineChartBarData(
                 spots: spots,

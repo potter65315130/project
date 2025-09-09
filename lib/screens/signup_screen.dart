@@ -160,7 +160,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A), // เปลี่ยนเป็นสีดำเหมือนในภาพ
+      backgroundColor: const Color(0xFF1A1A1A),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -173,7 +173,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFB4FF39), // สีเขียวสดใส
+                    color: const Color(0xFFB4FF39),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(
@@ -183,7 +183,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // หัวข้อ Sign up
                 const Text(
                   "Sign up",
                   style: TextStyle(

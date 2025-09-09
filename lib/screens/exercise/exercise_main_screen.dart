@@ -1,5 +1,3 @@
-// screens/exercise/exercise_main_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:health_mate/models/exercise_model.dart';
 import 'package:health_mate/screens/activity_tracking_screen.dart';
@@ -11,7 +9,7 @@ class ExerciseMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A), // Dark background like in image
+      backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
@@ -105,7 +103,7 @@ class ExerciseMainScreen extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A), // Dark card background
+          color: const Color(0xFF2A2A2A),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFF3A3A3A), width: 1),
         ),
@@ -114,7 +112,7 @@ class ExerciseMainScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF9ACD32), // Lime green like in image
+                color: const Color(0xFF9ACD32),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: Colors.black, size: 24),

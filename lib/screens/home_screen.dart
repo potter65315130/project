@@ -265,225 +265,392 @@ class HomeScreen extends StatelessWidget {
       body:
           homeProvider.isLoading
               ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF8BC34A)),
-                )
+                child: CircularProgressIndicator(color: Color(0xFF8BC34A)),
+              )
               : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
 
-                      // Circular Calorie Progress at the top
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Center(
-                          child: SizedBox(
-                            width: 200,
-                            height: 200,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Background circle
-                                Container(
-                                  width: 200,
-                                  height: 200,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xFF2A2A2A),
-                                    border: Border.all(
-                                      color: const Color(0xFF333333),
-                                      width: 2,
-                                    ),
+                    // Circular Calorie Progress at the top
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Background circle
+                              Container(
+                                width: 200,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFF2A2A2A),
+                                  border: Border.all(
+                                    color: const Color(0xFF333333),
+                                    width: 2,
                                   ),
                                 ),
-                                // Progress circle
-                                SizedBox(
-                                  width: 180,
-                                  height: 180,
-                                  child: CircularProgressIndicator(
-                                    value: calorieProgress.clamp(0.0, 1.0),
-                                    strokeWidth: 8,
-                                    backgroundColor: const Color(0xFF333333),
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      calorieProgress > 1.0
-                                          ? Colors.red
-                                          : const Color(0xFF8BC34A),
-                                    ),
+                              ),
+                              // Progress circle
+                              SizedBox(
+                                width: 180,
+                                height: 180,
+                                child: CircularProgressIndicator(
+                                  value: calorieProgress.clamp(0.0, 1.0),
+                                  strokeWidth: 8,
+                                  backgroundColor: const Color(0xFF333333),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    calorieProgress > 1.0
+                                        ? Colors.red
+                                        : const Color(0xFF8BC34A),
                                   ),
                                 ),
-                                // Center content
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                              ),
+                              // Center content
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'แคลอรี่ที่เหลือ',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${remainingCal.toInt()}',
+                                    style: TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          remainingCal >= 0
+                                              ? const Color(0xFF8BC34A)
+                                              : Colors.red,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'kcal',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Weight and Target Section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2A2A2A),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'น้ำหนักปัจจุบัน',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${weight.toStringAsFixed(1)} กก.',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text(
+                                'เป้าหมาย',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${targetWeight.toStringAsFixed(1)} กก.',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF8BC34A),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: TextButton(
+                              onPressed: () => _showUpdateWeightDialog(context),
+                              child: const Text(
+                                'อัปเดต',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Stats Row
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2A2A2A),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.monitor_weight,
+                                      color: Colors.blue,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'BMI',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    bmi.toStringAsFixed(1),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    _getBMIStatus(bmi),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2A2A2A),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xFF8BC34A,
+                                      ).withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.local_fire_department,
+                                      color: Color(0xFF8BC34A),
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'BMR',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    bmr.toInt().toString(),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'kcal/วัน',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2A2A2A),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.calendar_today,
+                                      color: Colors.orange,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'เหลือ',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    daysLeft.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'วัน',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _navigateToAddCalories(context),
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2A2A2A),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Column(
                                   children: [
-                                    Text(
-                                      'แคลอรี่ที่เหลือ',
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.restaurant,
+                                        color: Colors.orange,
+                                        size: 28,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      'อาหาร',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey.shade400,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '${remainingCal.toInt()}',
-                                      style: TextStyle(
-                                        fontSize: 32,
+                                      '${intake.toInt()}',
+                                      style: const TextStyle(
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color:
-                                            remainingCal >= 0
-                                                ? const Color(0xFF8BC34A)
-                                                : Colors.red,
+                                        color: Colors.orange,
                                       ),
                                     ),
                                     const Text(
                                       'kcal',
-                                      style: TextStyle(color: Colors.grey),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Weight and Target Section
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2A2A2A),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'น้ำหนักปัจจุบัน',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${weight.toStringAsFixed(1)} กก.',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                const Text(
-                                  'เป้าหมาย',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${targetWeight.toStringAsFixed(1)} กก.',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF8BC34A),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: TextButton(
-                                onPressed: () => _showUpdateWeightDialog(context),
-                                child: const Text(
-                                  'อัปเดต',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Stats Row
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            Expanded(
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _navigateToBurnCalories(context),
                               child: Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF2A2A2A),
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Column(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.2),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.monitor_weight,
-                                        color: Colors.blue,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      'BMI',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    Text(
-                                      bmi.toStringAsFixed(1),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      _getBMIStatus(bmi),
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF2A2A2A),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
+                                      padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
                                         color: const Color(
                                           0xFF8BC34A,
@@ -491,31 +658,34 @@ class HomeScreen extends StatelessWidget {
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
-                                        Icons.local_fire_department,
+                                        Icons.fitness_center,
                                         color: Color(0xFF8BC34A),
-                                        size: 20,
+                                        size: 28,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 12),
                                     const Text(
-                                      'BMR',
+                                      'ออกกำลังกาย',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    Text(
-                                      bmr.toInt().toString(),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
                                     ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${burned.toInt()}',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF8BC34A),
+                                      ),
+                                    ),
                                     const Text(
-                                      'kcal/วัน',
+                                      'kcal',
                                       style: TextStyle(
-                                        fontSize: 10,
+                                        fontSize: 12,
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -523,280 +693,112 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF2A2A2A),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange.withOpacity(0.2),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.calendar_today,
-                                        color: Colors.orange,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      'เหลือ',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    Text(
-                                      daysLeft.toString(),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'วัน',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Action Buttons
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => _navigateToAddCalories(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2A2A2A),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange.withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.restaurant,
-                                          color: Colors.orange,
-                                          size: 28,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      const Text(
-                                        'อาหาร',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '${intake.toInt()}',
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.orange,
-                                        ),
-                                      ),
-                                      const Text(
-                                        'kcal',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => _navigateToBurnCalories(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2A2A2A),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF8BC34A,
-                                          ).withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.fitness_center,
-                                          color: Color(0xFF8BC34A),
-                                          size: 28,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      const Text(
-                                        'ออกกำลังกาย',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '${burned.toInt()}',
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF8BC34A),
-                                        ),
-                                      ),
-                                      const Text(
-                                        'kcal',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                    ),
+                    const SizedBox(height: 32),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2A2A2A),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      const SizedBox(height: 32),
-                      // lib/screens/home_screen.dart
-
-// ... (โค้ดที่อยู่แล้ว)
-
-          const SizedBox(height: 32),
-
-          // Chart Section for Weight - NEW
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2A2A2A),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'ประวัติการเปลี่ยนแปลงน้ำหนัก',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                StreamBuilder<List<DailyQuestModel>>(
-                  stream: FirestoreService().getQuestHistoryStream(user.uid!, 7), // ดึงข้อมูล 7 วันล่าสุด
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator(color: Color(0xFF8BC34A));
-                    }
-                    if (snapshot.hasError) {
-                      return Text(
-                        'เกิดข้อผิดพลาด: ${snapshot.error}',
-                        style: const TextStyle(color: Colors.red),
-                      );
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text(
-                        'ไม่มีข้อมูลน้ำหนักในสัปดาห์นี้',
-                        style: TextStyle(color: Colors.white),
-                      );
-                    }
-                    return WeightChartWidget(quests: snapshot.data!);
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-// ... (ต่อด้วยโค้ด Chart Section for Calorie ที่มีอยู่แล้ว)
-                      // Chart Section - MOVED TO THE END
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2A2A2A),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'ปริมาณแคลอรี่ที่ได้รับต่อวัน',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'ประวัติการเปลี่ยนแปลงน้ำหนัก',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 16),
-                            StreamBuilder<List<DailyQuestModel>>(
-                              stream: FirestoreService().getQuestHistoryStream(user.uid!, 7),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const CircularProgressIndicator(color: Color(0xFF8BC34A));
-                                }
-                                if (snapshot.hasError) {
-                                  return Text(
-                                    'เกิดข้อผิดพลาด: ${snapshot.error}',
-                                    style: const TextStyle(color: Colors.red),
-                                  );
-                                }
-                                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                  return const Text(
-                                    'ไม่มีข้อมูลแคลอรี่ในสัปดาห์นี้',
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                }
-                                return CalorieChartWidget(quests: snapshot.data!);
-                              },
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 16),
+                          StreamBuilder<List<DailyQuestModel>>(
+                            stream: FirestoreService().getQuestHistoryStream(
+                              user.uid!,
+                              7,
+                            ), // ดึงข้อมูล 7 วันล่าสุด
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator(
+                                  color: Color(0xFF8BC34A),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'เกิดข้อผิดพลาด: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.red),
+                                );
+                              }
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return const Text(
+                                  'ไม่มีข้อมูลน้ำหนักในสัปดาห์นี้',
+                                  style: TextStyle(color: Colors.white),
+                                );
+                              }
+                              return WeightChartWidget(quests: snapshot.data!);
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2A2A2A),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'ปริมาณแคลอรี่ที่ได้รับต่อวัน',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          StreamBuilder<List<DailyQuestModel>>(
+                            stream: FirestoreService().getQuestHistoryStream(
+                              user.uid!,
+                              7,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator(
+                                  color: Color(0xFF8BC34A),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'เกิดข้อผิดพลาด: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.red),
+                                );
+                              }
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return const Text(
+                                  'ไม่มีข้อมูลแคลอรี่ในสัปดาห์นี้',
+                                  style: TextStyle(color: Colors.white),
+                                );
+                              }
+                              return CalorieChartWidget(quests: snapshot.data!);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
+              ),
     );
   }
 }

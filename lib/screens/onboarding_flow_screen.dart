@@ -18,24 +18,23 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   int _currentPage = 0;
   bool _isLoading = false;
 
-  // Colors from Signup Screen
   static const Color _backgroundColor = Color(0xFF1A1A1A);
   static const Color _primaryColor = Color(0xFFB4FF39);
   static const Color _fieldColor = Color(0xFF2A2A2A);
   static const Color _textColor = Colors.white;
   static final Color _hintColor = Colors.grey[400]!;
 
-  // Step 1: Gender Selection
+  // Gender Selection
   String? _selectedGender;
 
-  // Step 2: Profile Information
+  // Profile Information
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _currentWeightController =
       TextEditingController();
   final TextEditingController _targetWeightController = TextEditingController();
 
-  // Step 3: Activity Level
+  // Activity Level
   final Map<String, double> _activityLevels = {
     'ไม่ออกกำลังกายเลย หรือน้อยมาก (Sedentary)': 1.2,
     'ออกกำลังกายเบา (Lightly Active)': 1.375,
@@ -45,7 +44,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   };
   String? _selectedActivityLevel;
 
-  // Step 4: Plan Selection
+  // Plan Selection
   String? _selectedPlanSpeed;
 
   @override
@@ -58,7 +57,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     super.dispose();
   }
 
-  // --- LOGIC FUNCTIONS (UNCHANGED) ---
   void _nextPage() {
     if (_currentPage < 4) {
       _pageController.nextPage(
@@ -272,8 +270,6 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
-  // --- UI WIDGETS (RE-STYLED) ---
 
   @override
   Widget build(BuildContext context) {

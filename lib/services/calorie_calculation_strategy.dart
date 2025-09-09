@@ -1,5 +1,3 @@
-// lib/services/calorie_calculation_strategy.dart
-
 import 'package:health_mate/models/exercise_model.dart';
 
 /// คลาสสำหรับรวบรวมพารามิเตอร์ที่จำเป็นในการคำนวณ

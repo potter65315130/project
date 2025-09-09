@@ -1,5 +1,3 @@
-// lib/widgets/weight_chart_widget.dart
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:health_mate/models/daily_quest_model.dart';
@@ -13,22 +11,16 @@ class WeightChartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (quests.isEmpty) {
-      return const Center(
-        child: Text('ไม่มีข้อมูลน้ำหนักย้อนหลัง'),
-      );
+      return const Center(child: Text('ไม่มีข้อมูลน้ำหนักย้อนหลัง'));
     }
 
-    final List<FlSpot> spots = quests
-        .asMap()
-        .entries
-        .map((entry) {
+    final List<FlSpot> spots =
+        quests.asMap().entries.map((entry) {
           return FlSpot(entry.key.toDouble(), entry.value.weight);
-        })
-        .toList();
+        }).toList();
 
-    final List<String> dates = quests
-        .map((e) => DateFormat('d MMM','th').format(e.date))
-        .toList();
+    final List<String> dates =
+        quests.map((e) => DateFormat('d MMM', 'th').format(e.date)).toList();
 
     return AspectRatio(
       aspectRatio: 1.70,
@@ -79,10 +71,7 @@ class WeightChartWidget extends StatelessWidget {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       value.toInt().toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                     );
                   },
                   reservedSize: 28,
@@ -102,16 +91,14 @@ class WeightChartWidget extends StatelessWidget {
                 isStrokeCapRound: true,
                 dotData: FlDotData(
                   show: true,
-                  getDotPainter: (spot, percent, barData, index) =>
-                      FlDotCirclePainter(
-                    radius: 4,
-                    color: const Color(0xFF8BC34A),
-                    strokeColor: Colors.transparent,
-                  ),
+                  getDotPainter:
+                      (spot, percent, barData, index) => FlDotCirclePainter(
+                        radius: 4,
+                        color: const Color(0xFF8BC34A),
+                        strokeColor: Colors.transparent,
+                      ),
                 ),
-                belowBarData: BarAreaData(
-                  show: false,
-                ),
+                belowBarData: BarAreaData(show: false),
               ),
             ],
           ),

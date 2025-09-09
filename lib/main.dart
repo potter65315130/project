@@ -5,8 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_mate/providers/exercise_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/date_symbol_data_local.dart'; // <-- 1. เพิ่มบรรทัดนี้
-
+import 'package:intl/date_symbol_data_local.dart';
 // นำเข้าหน้าจอ
 import 'package:health_mate/screens/login_screen.dart';
 import 'package:health_mate/widgets/bottom_bar.dart';
@@ -16,9 +15,9 @@ import 'package:health_mate/providers/home_provider.dart';
 import 'package:health_mate/models/user_model.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // รอให้ระบบพร้อม
-  await Firebase.initializeApp(); // เริ่มต้น Firebase
-  await initializeDateFormatting('th', null); // <-- 2. เพิ่มบรรทัดนี้
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await initializeDateFormatting('th', null);
   runApp(const MyApp());
 }
 

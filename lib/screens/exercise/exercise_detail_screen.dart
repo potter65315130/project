@@ -1,11 +1,8 @@
-// screens/exercise/exercise_detail_screen.dart
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:health_mate/models/exercise_model.dart';
 import 'package:health_mate/providers/exercise_provider.dart';
 import 'package:health_mate/providers/home_provider.dart';
-// เพิ่ม import สำหรับ Strategy
 import 'package:health_mate/services/calorie_calculation_strategy.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -229,7 +226,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
     );
   }
 
-  /// **ฟังก์ชันใหม่:** ตรวจสอบ Strategy และเลือกแสดงฟอร์มที่ถูกต้อง
+  //  ฟังก์ชันตรวจสอบ Strategy และเลือกแสดงฟอร์มที่ถูกต้อง
   Widget _buildInputFields() {
     final strategy = widget.exercise.calculationStrategy;
 

@@ -4,11 +4,9 @@ import 'package:health_mate/providers/home_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-// --- UI THEME CONSTANTS ---
 const Color _darkElementColor = Color(0xFF1E1E1E);
 const Color _lightTextColor = Colors.white;
 const Color _mediumTextColor = Color(0xFFB0B0B0);
-// --- END UI THEME CONSTANTS ---
 
 // Dialog สำหรับแสดงรายละเอียดและลบรายการอาหารที่บันทึกไว้
 Future<void> showFoodEntryDetailDialog({

@@ -1,5 +1,3 @@
-// models/exercise_model.dart
-
 import 'package:health_mate/services/calorie_calculation_strategy.dart';
 
 enum ExerciseCategory { weightTraining, cardio }

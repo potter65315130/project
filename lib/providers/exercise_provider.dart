@@ -27,7 +27,6 @@ class ExerciseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // --- ADDED METHOD ---
   /// ค้นหาท่าออกกำลังกายจากชื่อที่ระบุ
   /// ใช้ในหน้า 'รายการของฉัน' เพื่อดึงข้อมูลสำหรับหน้า Detail
   Exercise? findExerciseByName(String name) {
@@ -40,7 +39,6 @@ class ExerciseProvider with ChangeNotifier {
       return null;
     }
   }
-  // --------------------
 
   /// ฟังก์ชันคำนวณแคลอรี่ที่เรียกใช้ Strategy ที่เหมาะสม
   double calculateCalories({
