@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Health Mate',
         debugShowCheckedModeBanner: false,
-        home: const AuthWrapper(), // ตรวจสอบสถานะผู้ใช้
+        home: const AuthWrapper(),
       ),
     );
   }
@@ -51,7 +51,10 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, authSnapshot) {
         if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: Color(0xFF1A1A1A),
+            body: Center(
+              child: CircularProgressIndicator(color: Color(0xFF8BC34A)),
+            ),
           );
         } else if (authSnapshot.hasData) {
           final uid = authSnapshot.data!.uid;
@@ -62,33 +65,40 @@ class AuthWrapper extends StatelessWidget {
                 .doc(uid)
                 .get()
                 .catchError((error) {
-                  // จับ error ตรงนี้ด้วย เผื่อ permission denied
                   if (error is FirebaseException &&
                       error.code == 'permission-denied') {
-                    // Return null เพื่อให้ไปทำ signOut
                     // ignore: invalid_return_type_for_catch_error
                     return null;
                   }
-                  throw error; // Re-throw error อื่นๆ
+                  throw error;
                 }),
             builder: (context, userDocSnapshot) {
               if (userDocSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
+                  backgroundColor: Color(0xFF1A1A1A),
+                  body: Center(
+                    child: CircularProgressIndicator(color: Color(0xFF8BC34A)),
+                  ),
                 );
               }
 
-              // ตรวจสอบ error หรือ ไม่มีข้อมูล หรือ data เป็น null (จาก catchError)
               if (userDocSnapshot.hasError ||
                   !userDocSnapshot.hasData ||
                   userDocSnapshot.data == null ||
                   !userDocSnapshot.data!.exists) {
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (context.mounted) {
+                    // ล้างข้อมูลใน UserProvider
                     Provider.of<UserProvider>(
                       context,
                       listen: false,
                     ).clearUser();
+
+                    // ล้างข้อมูลใน HomeProvider
+                    Provider.of<HomeProvider>(
+                      context,
+                      listen: false,
+                    ).refreshData();
 
                     try {
                       await FirebaseAuth.instance.signOut();
@@ -99,7 +109,6 @@ class AuthWrapper extends StatelessWidget {
                     }
 
                     if (context.mounted) {
-                      // แสดงข้อความแจ้งเตือน
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -114,20 +123,23 @@ class AuthWrapper extends StatelessWidget {
                 });
 
                 return const Scaffold(
+                  backgroundColor: Color(0xFF1A1A1A),
                   body: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(),
+                        CircularProgressIndicator(color: Color(0xFF8BC34A)),
                         SizedBox(height: 16),
-                        Text("กำลังตรวจสอบข้อมูล..."),
+                        Text(
+                          "กำลังตรวจสอบข้อมูล...",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ],
                     ),
                   ),
                 );
               }
 
-              // แปลงข้อมูลเป็น UserModel
               final data = userDocSnapshot.data!.data();
               if (data is Map<String, dynamic>) {
                 final userModel = UserModel.fromFirestore(
@@ -137,34 +149,55 @@ class AuthWrapper extends StatelessWidget {
 
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (context.mounted) {
-                    Provider.of<UserProvider>(
+                    final userProvider = Provider.of<UserProvider>(
                       context,
                       listen: false,
-                    ).setUser(userModel);
+                    );
+
+                    // ตรวจสอบว่าเป็น user คนเดิมหรือไม่
+                    if (userProvider.user?.uid != userModel.uid) {
+                      // เป็น user ใหม่ ให้ล้างข้อมูลเก่าก่อน
+                      userProvider.clearUser();
+                      Provider.of<HomeProvider>(
+                        context,
+                        listen: false,
+                      ).refreshData();
+                    }
+
+                    userProvider.setUser(userModel);
                   }
                 });
 
                 return const BottomBar();
               } else {
-                // กรณี data structure ไม่ถูกต้อง
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (context.mounted) {
                     Provider.of<UserProvider>(
                       context,
                       listen: false,
                     ).clearUser();
+
+                    Provider.of<HomeProvider>(
+                      context,
+                      listen: false,
+                    ).refreshData();
+
                     await FirebaseAuth.instance.signOut();
                   }
                 });
 
                 return const Scaffold(
+                  backgroundColor: Color(0xFF1A1A1A),
                   body: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(),
+                        CircularProgressIndicator(color: Color(0xFF8BC34A)),
                         SizedBox(height: 16),
-                        Text("กำลังตรวจสอบข้อมูล..."),
+                        Text(
+                          "กำลังตรวจสอบข้อมูล...",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ],
                     ),
                   ),
@@ -173,10 +206,11 @@ class AuthWrapper extends StatelessWidget {
             },
           );
         } else {
-          // ไม่มี user login
+          // ไม่มี user login - ล้างข้อมูลทั้งหมด
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
               Provider.of<UserProvider>(context, listen: false).clearUser();
+              Provider.of<HomeProvider>(context, listen: false).refreshData();
             }
           });
           return LoginScreen();

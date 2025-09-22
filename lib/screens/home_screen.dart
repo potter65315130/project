@@ -1,5 +1,3 @@
-// lib/screens/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:health_mate/screens/activity_tracking_screen.dart';
@@ -13,9 +11,9 @@ import 'package:health_mate/models/user_model.dart';
 import 'package:health_mate/providers/home_provider.dart';
 import 'package:health_mate/screens/history/history_screen.dart';
 import 'package:health_mate/services/firestore_service.dart';
-import 'package:fl_chart/fl_chart.dart'; // เพิ่ม import นี้
-import 'package:health_mate/widgets/calorie_chart_widget.dart'; // เพิ่ม import นี้
-import 'package:health_mate/models/daily_quest_model.dart'; // เพิ่ม import นี้
+import 'package:fl_chart/fl_chart.dart';
+import 'package:health_mate/widgets/calorie_chart_widget.dart';
+import 'package:health_mate/models/daily_quest_model.dart';
 import 'package:health_mate/widgets/weight_chart_widget.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -206,19 +204,29 @@ class HomeScreen extends StatelessWidget {
       );
     }
 
-    final remainingCal = quest.netCalorie;
+    final remainingCal =
+        quest.calorieTarget - quest.calorieIntake + quest.calorieBurned;
     final intake = quest.calorieIntake;
     final burned = quest.calorieBurned;
-    final weight = quest.weight;
+    final weight = user.weight; // ใช้น้ำหนักจาก user แทน quest
     final targetWeight = user.targetWeight;
     final bmi = user.calculateBMI();
     final bmr = user.calculateBMR();
     final daysLeft = FirestoreService().calculateDaysLeft(user);
     final calorieProgress =
         quest.calorieTarget > 0
-            ? (quest.calorieTarget - remainingCal) / quest.calorieTarget
+            ? (quest.calorieIntake - quest.calorieBurned) / quest.calorieTarget
             : 0.0;
-
+    if (kDebugMode) {
+      print('=== HOME SCREEN DEBUG ===');
+      print('User weight: ${user.weight}');
+      print('Quest weight: ${quest.weight}');
+      print('Quest calorieTarget: ${quest.calorieTarget}');
+      print('Quest calorieIntake: ${quest.calorieIntake}');
+      print('Quest calorieBurned: ${quest.calorieBurned}');
+      print('Remaining calories: $remainingCal');
+      print('=========================');
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(

@@ -5,6 +5,9 @@ import 'package:health_mate/models/user_model.dart';
 import 'package:health_mate/services/firestore_service.dart';
 import 'package:intl/intl.dart';
 import 'package:health_mate/widgets/bottom_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:health_mate/providers/user_provider.dart';
+import 'package:health_mate/providers/home_provider.dart';
 
 class OnboardingFlowScreen extends StatefulWidget {
   const OnboardingFlowScreen({super.key});
@@ -254,9 +257,34 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
       if (!mounted) return;
 
+      // อัปเดต Provider ทันทีหลังจากบันทึกข้อมูล
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+
+      // ตั้งค่า UserProvider
+      userProvider.setUser(userData);
+
+      // รีเฟรช HomeProvider เพื่อโหลดข้อมูลใหม่
+      await homeProvider.refreshData();
+
+      // สร้าง DailyQuest สำหรับวันนี้ทันที
+      try {
+        await firestoreService.fetchOrCreateTodayQuest(
+          user.uid,
+          dailyCalorieTarget,
+          currentWeight,
+        );
+        // โหลดข้อมูลอีกครั้งหลังจากสร้าง DailyQuest
+        await homeProvider.loadData();
+      } catch (e) {
+        // ถ้าเกิด error ในการสร้าง quest ก็ยังให้ไปหน้าหลักได้
+        print('Error creating today quest: $e');
+      }
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ!')));
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const BottomBar()),
@@ -652,10 +680,11 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     final targetWeight = double.parse(_targetWeightController.text.trim());
 
     String planType = 'รักษาน้ำหนัก';
-    if (targetWeight > currentWeight)
+    if (targetWeight > currentWeight) {
       planType = 'เพิ่มน้ำหนัก';
-    else if (targetWeight < currentWeight)
+    } else if (targetWeight < currentWeight) {
       planType = 'ลดน้ำหนัก';
+    }
 
     final planSpeeds = {
       'Normal': 'ธรรมดา (0.25 กก./สัปดาห์)',
@@ -737,18 +766,19 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
     double weeklyTarget = 0.0;
     String planType = 'รักษาน้ำหนัก';
-    if (targetWeight > currentWeight)
+    if (targetWeight > currentWeight) {
       planType = 'เพิ่มน้ำหนัก';
-    else if (targetWeight < currentWeight)
+    } else if (targetWeight < currentWeight) {
       planType = 'ลดน้ำหนัก';
-
+    }
     if (targetWeight != currentWeight && _selectedPlanSpeed != null) {
-      if (_selectedPlanSpeed == 'Normal')
+      if (_selectedPlanSpeed == 'Normal') {
         weeklyTarget = 0.25;
-      else if (_selectedPlanSpeed == 'Fast')
+      } else if (_selectedPlanSpeed == 'Fast') {
         weeklyTarget = 0.5;
-      else if (_selectedPlanSpeed == 'Very Fast')
+      } else if (_selectedPlanSpeed == 'Very Fast') {
         weeklyTarget = 1.0;
+      }
     }
 
     final dailyCalorieTarget = _calculateDailyCalorieTarget(

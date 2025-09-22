@@ -167,8 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
             padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                const SizedBox(height: 55),
-                // ไอคอนแดมเบล
+                const SizedBox(height: 60),
                 Container(
                   width: 80,
                   height: 80,
@@ -301,7 +300,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // ปุ่ม Get Started
                 if (_isLoading)
                   const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -348,7 +346,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
 
                 const SizedBox(height: 30),
-                // ลิงค์ไปหน้า Sign In
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -16,6 +16,7 @@ class HomeProvider with ChangeNotifier {
   UserModel? _user;
   DailyQuestModel? _quest;
   bool _isLoading = true;
+  String? _currentUserId; // เก็บ ID ของ user ปัจจุบัน
 
   UserModel? get user => _user;
   DailyQuestModel? get quest => _quest;
@@ -23,6 +24,29 @@ class HomeProvider with ChangeNotifier {
 
   HomeProvider() {
     loadData();
+    // ฟัง auth state changes
+    _auth.authStateChanges().listen((User? user) {
+      final newUserId = user?.uid;
+      if (_currentUserId != newUserId) {
+        _currentUserId = newUserId;
+        _clearData(); // ล้างข้อมูลเก่า
+        loadData(); // โหลดข้อมูลใหม่
+      }
+    });
+  }
+
+  // ฟังก์ชันล้างข้อมูล
+  void _clearData() {
+    _user = null;
+    _quest = null;
+    _isLoading = true;
+    notifyListeners();
+  }
+
+  // เพิ่มฟังก์ชันสำหรับ refresh ข้อมูลจากภายนอก
+  Future<void> refreshData() async {
+    _clearData();
+    await loadData();
   }
 
   Future<void> loadData() async {
@@ -31,31 +55,72 @@ class HomeProvider with ChangeNotifier {
 
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
+      _clearData();
       _isLoading = false;
       notifyListeners();
       return;
     }
 
+    // ตรวจสอบว่า user เปลี่ยนแล้วหรือไม่
+    if (_currentUserId != uid) {
+      _currentUserId = uid;
+      _clearData();
+      _isLoading = true;
+      notifyListeners();
+    }
+
     try {
       final user = await _firestoreService.getUser(uid);
       if (user == null) {
+        _clearData();
         _isLoading = false;
         notifyListeners();
         return;
       }
 
+      // ตรวจสอบให้แน่ใจว่ามีการสร้าง quest ด้วยข้อมูลล่าสุด
       final quest = await _firestoreService.fetchOrCreateTodayQuest(
         uid,
         user.dailyCalorieTarget,
         user.weight,
       );
 
+      // ถ้า quest ไม่มีข้อมูล หรือข้อมูลไม่ตรงกับ user ให้อัปเดต
+      if ((quest.weight != user.weight ||
+          quest.calorieTarget != user.dailyCalorieTarget)) {
+        try {
+          final todayId = DateFormat('yyyy-MM-dd').format(DateTime.now());
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .collection('dailyQuests')
+              .doc(todayId)
+              .update({
+                'weight': user.weight,
+                'calorieTarget': user.dailyCalorieTarget,
+              });
+          // โหลด quest ใหม่หลังจาก update
+          final updatedQuest = await _firestoreService.fetchOrCreateTodayQuest(
+            uid,
+            user.dailyCalorieTarget,
+            user.weight,
+          );
+          _quest = updatedQuest;
+        } catch (e) {
+          if (kDebugMode) print('Error updating quest data: $e');
+          _quest = quest;
+        }
+      } else {
+        _quest = quest;
+      }
+
       _user = user;
-      _quest = quest;
     } catch (e) {
       if (kDebugMode) {
         print('Error loading data in Provider: $e');
       }
+      // ในกรณีเกิด error ให้ล้างข้อมูลด้วย
+      _clearData();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -63,6 +128,12 @@ class HomeProvider with ChangeNotifier {
   }
 
   Future<void> updateWeight(String uid, double newWeight) async {
+    // ตรวจสอบว่า uid ตรงกับ current user หรือไม่
+    if (_auth.currentUser?.uid != uid) {
+      if (kDebugMode) print('UID mismatch in updateWeight');
+      return;
+    }
+
     _isLoading = true;
     notifyListeners();
 
@@ -75,70 +146,60 @@ class HomeProvider with ChangeNotifier {
           .collection('dailyQuests')
           .doc(todayId)
           .update({'weight': newWeight});
-      // โหลดข้อมูลใหม่ทั้งหมดเพื่อให้ UI อัปเดตสมบูรณ์
       await loadData();
     } catch (e) {
       if (kDebugMode) {
         print('Error updating weight in Provider: $e');
       }
-      // โหลดข้อมูลอีกครั้งแม้จะเกิด error เพื่อคืนสถานะเดิม
       await loadData();
     }
   }
 
   Future<void> logFood(FoodEntryModel entry) async {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null || uid != _currentUserId) return;
 
     _isLoading = true;
     notifyListeners();
     try {
-      // ใช้ FirestoreService เพื่อบันทึกข้อมูลอาหารและอัปเดตแคลอรี่รวม
       await _firestoreService.logFoodEntry(uid, entry);
-      await loadData(); // โหลดข้อมูลใหม่เพื่อให้หน้า Home อัปเดต
+      await loadData();
     } catch (e) {
       if (kDebugMode) print('Error logging food in Provider: $e');
-      await loadData(); // โหลดข้อมูลใหม่แม้จะเกิดข้อผิดพลาด
+      await loadData();
     }
   }
 
   Future<void> deleteFoodLog(FoodEntryModel entryToDelete) async {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null || uid != _currentUserId) return;
 
-    // ตรวจสอบให้แน่ใจว่า entry ที่จะลบมี ID
     if (entryToDelete.id == null) {
       if (kDebugMode) print('Cannot delete food log without an ID.');
       return;
     }
 
     try {
-      // 1. เตรียมข้อมูล date string จาก timestamp ของ entry
       final dateString = DateFormat(
         'yyyy-MM-dd',
       ).format(entryToDelete.timestamp);
 
-      // 2. เรียกใช้ Service ด้วย parameters ที่ถูกต้อง
       await _firestoreService.deleteFoodEntry(uid, dateString, entryToDelete);
-
-      // 3. โหลดข้อมูลใหม่เพื่อให้ UI ทั้งหมดอัปเดต
       await loadData();
     } catch (e) {
       if (kDebugMode) {
         print('Error deleting food log in Provider: $e');
       }
-      // สามารถแจ้งเตือนผู้ใช้ว่าลบไม่สำเร็จได้ที่นี่
     }
   }
 
   Future<void> logActivity(RunningSessionModel session) async {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null || uid != _currentUserId) return;
 
     _isLoading = true;
     notifyListeners();
     try {
-      // ใช้ FirestoreService เพื่อบันทึกข้อมูลการวิ่งและอัปเดตแคลอรี่รวม
       await _firestoreService.logRunningSession(uid, session);
       await loadData();
     } catch (e) {
@@ -148,6 +209,8 @@ class HomeProvider with ChangeNotifier {
   }
 
   Future<void> addCalories(String uid, double calories) async {
+    if (_auth.currentUser?.uid != uid || uid != _currentUserId) return;
+
     _isLoading = true;
     notifyListeners();
     try {
@@ -160,6 +223,8 @@ class HomeProvider with ChangeNotifier {
   }
 
   Future<void> burnCalories(String uid, double calories) async {
+    if (_auth.currentUser?.uid != uid || uid != _currentUserId) return;
+
     _isLoading = true;
     notifyListeners();
     try {
@@ -169,5 +234,12 @@ class HomeProvider with ChangeNotifier {
       if (kDebugMode) print('Error burning calories in Provider: $e');
       await loadData();
     }
+  }
+
+  @override
+  void dispose() {
+    // ล้างข้อมูลเมื่อ dispose
+    _clearData();
+    super.dispose();
   }
 }
