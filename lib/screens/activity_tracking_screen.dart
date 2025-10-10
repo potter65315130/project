@@ -8,6 +8,8 @@ import 'package:health_mate/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+enum TrackingState { idle, countdown, running, paused, finished }
+
 class ActivityTrackingScreen extends StatefulWidget {
   const ActivityTrackingScreen({super.key});
 
@@ -19,15 +21,18 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   final MapController _mapController = MapController();
 
   Position? _currentPosition;
-
-  bool _isTracking = false;
+  TrackingState _state = TrackingState.idle;
   StreamSubscription<Position>? _positionStream;
   Timer? _timer;
+  Timer? _countdownTimer;
+  int _countdown = 3;
 
   final List<LatLng> _routePoints = [];
   double _distance = 0.0;
   Duration _duration = Duration.zero;
   double _caloriesBurned = 0.0;
+  double _currentSpeed = 0.0; // km/h
+  double _avgSpeed = 0.0; // km/h
 
   @override
   void initState() {
@@ -36,17 +41,14 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   }
 
   Future<void> _checkLocationPermissionAndGetPosition() async {
-    // 1. ตรวจสอบว่าเปิด GPS (Location Services) หรือยัง
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _showLocationServiceDialog();
       return;
     }
 
-    // 2. ตรวจสอบสิทธิ์ที่ผู้ใช้ให้
     LocationPermission permission = await Geolocator.checkPermission();
 
-    // ถ้ายังไม่ได้ขอ หรือถูกปฏิเสธ
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
@@ -55,13 +57,11 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       }
     }
 
-    // ถ้าผู้ใช้ปฏิเสธถาวร
     if (permission == LocationPermission.deniedForever) {
       _showOpenSettingsDialog();
       return;
     }
 
-    // 3. ดึงตำแหน่งเมื่อได้สิทธิ์
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -86,20 +86,39 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
     }
   }
 
-  void _startTracking() {
+  void _startCountdown() {
     if (_currentPosition == null) {
       _showErrorDialog('ยังไม่พบตำแหน่งปัจจุบัน โปรดรอสักครู่');
       return;
     }
 
     setState(() {
-      _isTracking = true;
+      _state = TrackingState.countdown;
+      _countdown = 3;
+    });
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown > 1) {
+        setState(() {
+          _countdown--;
+        });
+      } else {
+        timer.cancel();
+        _startTracking();
+      }
+    });
+  }
+
+  void _startTracking() {
+    setState(() {
+      _state = TrackingState.running;
       _routePoints.clear();
       _distance = 0.0;
       _duration = Duration.zero;
       _caloriesBurned = 0.0;
+      _currentSpeed = 0.0;
+      _avgSpeed = 0.0;
 
-      // เพิ่มตำแหน่งปัจจุบันเป็นจุดเริ่มต้น
       _routePoints.add(
         LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
       );
@@ -107,21 +126,25 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
 
     // Timer สำหรับนับเวลา
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
+      if (mounted && _state == TrackingState.running) {
         setState(() {
           _duration += const Duration(seconds: 1);
+          // คำนวณความเร็วเฉลี่ย
+          if (_duration.inSeconds > 0) {
+            _avgSpeed = (_distance / 1000) / (_duration.inSeconds / 3600);
+          }
         });
       }
     });
 
-    // Stream สำหรับติดตามตำแหน่ง
+    // Stream สำหรับติดตามตำแหน่ง - ลด distanceFilter เพื่อความแม่นยำมากขึ้น
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 5,
+        distanceFilter: 2, // ลดจาก 5 เป็น 2 เมตร
       ),
     ).listen((Position position) {
-      if (mounted) {
+      if (mounted && _state == TrackingState.running) {
         final newPoint = LatLng(position.latitude, position.longitude);
         final userWeight = context.read<HomeProvider>().user?.weight ?? 70.0;
 
@@ -129,56 +152,149 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
           _currentPosition = position;
 
           if (_routePoints.isNotEmpty) {
-            _distance += Geolocator.distanceBetween(
+            final addedDistance = Geolocator.distanceBetween(
               _routePoints.last.latitude,
               _routePoints.last.longitude,
               newPoint.latitude,
               newPoint.longitude,
             );
+            _distance += addedDistance;
+
+            // คำนวณความเร็วปัจจุบัน (m/s -> km/h)
+            if (position.speed > 0) {
+              _currentSpeed = position.speed * 3.6;
+            }
           }
 
           _routePoints.add(newPoint);
           _caloriesBurned = (_distance / 1000) * userWeight * 1.036;
         });
 
-        // เลื่อนแผนที่ตามตำแหน่งใหม่
         _mapController.move(newPoint, 17.0);
       }
     });
   }
 
-  void _stopTracking() {
+  void _pauseTracking() {
+    _timer?.cancel();
+    setState(() {
+      _state = TrackingState.paused;
+    });
+  }
+
+  void _resumeTracking() {
+    setState(() {
+      _state = TrackingState.running;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted && _state == TrackingState.running) {
+        setState(() {
+          _duration += const Duration(seconds: 1);
+          if (_duration.inSeconds > 0) {
+            _avgSpeed = (_distance / 1000) / (_duration.inSeconds / 3600);
+          }
+        });
+      }
+    });
+  }
+
+  void _finishTracking() {
     _positionStream?.cancel();
     _timer?.cancel();
 
     setState(() {
-      _isTracking = false;
+      _state = TrackingState.finished;
     });
 
     if (_distance > 0) {
-      _showSaveDialog();
+      _showSummaryDialog();
+    } else {
+      _showErrorDialog('ไม่มีข้อมูลการวิ่ง กรุณาลองอีกครั้ง');
+      _resetTracking();
     }
   }
 
-  Future<void> _showSaveDialog() async {
+  void _resetTracking() {
+    _positionStream?.cancel();
+    _timer?.cancel();
+    _countdownTimer?.cancel();
+
+    setState(() {
+      _state = TrackingState.idle;
+      _routePoints.clear();
+      _distance = 0.0;
+      _duration = Duration.zero;
+      _caloriesBurned = 0.0;
+      _currentSpeed = 0.0;
+      _avgSpeed = 0.0;
+    });
+  }
+
+  Future<void> _showSummaryDialog() async {
+    final pace =
+        _duration.inSeconds > 0
+            ? (_duration.inSeconds / 60) / (_distance / 1000)
+            : 0.0;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder:
           (context) => AlertDialog(
-            title: const Text('บันทึกการออกกำลังกาย'),
-            content: Text(
-              'ระยะทาง: ${(_distance / 1000).toStringAsFixed(2)} กม.\n'
-              'เวลา: ${_formatDuration(_duration)}\n'
-              'เผาผลาญ: ${_caloriesBurned.toInt()} kcal\n\n'
-              'คุณต้องการบันทึกหรือไม่?',
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 28),
+                SizedBox(width: 8),
+                Text('สรุปการวิ่ง'),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSummaryRow(
+                    Icons.straighten,
+                    'ระยะทาง',
+                    '${(_distance / 1000).toStringAsFixed(2)} กม.',
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    Icons.timer,
+                    'เวลา',
+                    _formatDuration(_duration),
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    Icons.speed,
+                    'ความเร็วเฉลี่ย',
+                    '${_avgSpeed.toStringAsFixed(1)} กม./ชม.',
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    Icons.trending_up,
+                    'Pace',
+                    '${pace.toStringAsFixed(1)} นาที/กม.',
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    Icons.local_fire_department,
+                    'เผาผลาญ',
+                    '${_caloriesBurned.toInt()} kcal',
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _resetTracking();
+                },
                 child: const Text('ยกเลิก'),
               ),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () async {
                   final session = RunningSessionModel(
                     distance: _distance,
@@ -192,10 +308,41 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                     Navigator.of(context).pop(); // กลับหน้า Home
                   }
                 },
-                child: const Text('บันทึก'),
+                icon: const Icon(Icons.save),
+                label: const Text('บันทึก'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildSummaryRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: Colors.blue),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -288,6 +435,7 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   void dispose() {
     _positionStream?.cancel();
     _timer?.cancel();
+    _countdownTimer?.cancel();
     _mapController.dispose();
     super.dispose();
   }
@@ -295,28 +443,73 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ติดตามการออกกำลังกาย')),
+      appBar: AppBar(
+        title: const Text('ติดตามการวิ่ง'),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
       body: Column(
         children: [
           // ส่วนแสดงผลข้อมูล
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: Colors.grey.shade200,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade50, Colors.white],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Column(
               children: [
-                _buildInfoCard(
-                  'ระยะทาง',
-                  '${(_distance / 1000).toStringAsFixed(2)} กม.',
+                // แถวแรก: ระยะทาง และ เวลา
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatCard(
+                      'ระยะทาง',
+                      '${(_distance / 1000).toStringAsFixed(2)}',
+                      'กม.',
+                      Icons.straighten,
+                      Colors.blue,
+                    ),
+                    _buildStatCard(
+                      'เวลา',
+                      _formatDuration(_duration),
+                      '',
+                      Icons.timer,
+                      Colors.orange,
+                    ),
+                  ],
                 ),
-                _buildInfoCard('เวลา', _formatDuration(_duration)),
-                _buildInfoCard('เผาผลาญ', '${_caloriesBurned.toInt()} kcal'),
+                const SizedBox(height: 12),
+                // แถวสอง: ความเร็ว และ แคลอรี่
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatCard(
+                      'ความเร็ว',
+                      _currentSpeed.toStringAsFixed(1),
+                      'กม./ชม.',
+                      Icons.speed,
+                      Colors.green,
+                    ),
+                    _buildStatCard(
+                      'เผาผลาญ',
+                      '${_caloriesBurned.toInt()}',
+                      'kcal',
+                      Icons.local_fire_department,
+                      Colors.red,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           // ส่วนแผนที่
           Expanded(
-            child:
+            child: Stack(
+              children: [
                 _currentPosition == null
                     ? const Center(
                       child: Column(
@@ -343,28 +536,46 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.example.health_mate',
                         ),
-                        if (_routePoints.isNotEmpty)
+                        if (_routePoints.length > 1)
                           PolylineLayer(
                             polylines: [
                               Polyline(
                                 points: _routePoints,
                                 color: Colors.blue,
-                                strokeWidth: 5,
+                                strokeWidth: 6,
                               ),
                             ],
                           ),
                         MarkerLayer(
                           markers: [
+                            // จุดเริ่มต้น
+                            if (_routePoints.isNotEmpty)
+                              Marker(
+                                point: _routePoints.first,
+                                width: 30,
+                                height: 30,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 3,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            // ตำแหน่งปัจจุบัน
                             Marker(
                               point: LatLng(
                                 _currentPosition!.latitude,
                                 _currentPosition!.longitude,
                               ),
-                              width: 80,
-                              height: 80,
+                              width: 50,
+                              height: 50,
                               child: const Icon(
-                                Icons.run_circle,
-                                color: Colors.blueAccent,
+                                Icons.navigation,
+                                color: Colors.blue,
                                 size: 40,
                               ),
                             ),
@@ -372,35 +583,244 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                         ),
                       ],
                     ),
+                // Countdown overlay
+                if (_state == TrackingState.countdown)
+                  Container(
+                    color: Colors.black54,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '$_countdown',
+                            style: const TextStyle(
+                              fontSize: 120,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'เตรียมพร้อม...',
+                            style: TextStyle(fontSize: 24, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isTracking ? _stopTracking : _startTracking,
-        label: Text(_isTracking ? 'หยุด' : 'เริ่มวิ่ง'),
-        icon: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
-        backgroundColor: _isTracking ? Colors.red : Colors.green,
+      bottomNavigationBar: _buildControlButtons(),
+    );
+  }
+
+  Widget _buildStatCard(
+    String label,
+    String value,
+    String unit,
+    IconData icon,
+    Color color,
+  ) {
+    return Expanded(
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (unit.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 2, bottom: 2),
+                      child: Text(
+                        unit,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildInfoCard(String title, String value) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(color: Colors.black54, fontSize: 14),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-      ],
+  Widget _buildControlButtons() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(child: _buildButtonsForState()),
     );
+  }
+
+  Widget _buildButtonsForState() {
+    switch (_state) {
+      case TrackingState.idle:
+        return SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: _startCountdown,
+            icon: const Icon(Icons.play_arrow, size: 28),
+            label: const Text('เริ่มวิ่ง', style: TextStyle(fontSize: 18)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        );
+
+      case TrackingState.countdown:
+        return SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              _countdownTimer?.cancel();
+              _resetTracking();
+            },
+            icon: const Icon(Icons.close, size: 28),
+            label: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        );
+
+      case TrackingState.running:
+        return Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: _pauseTracking,
+                  icon: const Icon(Icons.pause, size: 28),
+                  label: const Text('หยุด', style: TextStyle(fontSize: 18)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SizedBox(
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: _finishTracking,
+                  icon: const Icon(Icons.stop, size: 28),
+                  label: const Text(
+                    'เสร็จสิ้น',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case TrackingState.paused:
+        return Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: _resumeTracking,
+                  icon: const Icon(Icons.play_arrow, size: 28),
+                  label: const Text(
+                    'ดำเนินต่อ',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SizedBox(
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: _finishTracking,
+                  icon: const Icon(Icons.stop, size: 28),
+                  label: const Text(
+                    'เสร็จสิ้น',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case TrackingState.finished:
+        return const SizedBox.shrink();
+    }
   }
 }
