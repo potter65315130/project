@@ -7,24 +7,10 @@ class ExerciseDatabase {
   static final List<Exercise> allExercises = [
     // --- Weight Training ---
     const Exercise(
-      id: 'dumbbell_press',
-      name: 'Dumbbell Bench Press',
+      id: 'Squat_kicks',
+      name: 'Squat kicks',
       category: ExerciseCategory.weightTraining,
-      lottieAssetPath: 'assets/lottie/dumbbell_press.json',
-      calculationStrategy: RepBasedWeightedStrategy(), // ใช้น้ำหนักที่ยก
-    ),
-    const Exercise(
-      id: 'bicep_curls',
-      name: 'Dumbbell Bicep Curls',
-      category: ExerciseCategory.weightTraining,
-      lottieAssetPath: 'assets/lottie/bicep_curls.json',
-      calculationStrategy: RepBasedWeightedStrategy(), // ใช้น้ำหนักที่ยก
-    ),
-    const Exercise(
-      id: 'squats',
-      name: 'Bodyweight Squats',
-      category: ExerciseCategory.weightTraining,
-      lottieAssetPath: 'assets/lottie/squats.json',
+      lottieAssetPath: 'assets/lottie/Squat_kicks.json',
       calculationStrategy: RepBasedBodyweightStrategy(), // ใช้น้ำหนักตัว
       bodyweightFactor: 0.45, // Squat ใช้ประมาณ 45% ของน้ำหนักตัว
     ),
@@ -39,6 +25,14 @@ class ExerciseDatabase {
       bodyweightFactor: 0.65,
     ),
     const Exercise(
+      id: 'Pull_ups',
+      name: 'Pull ups',
+      category: ExerciseCategory.weightTraining,
+      lottieAssetPath: 'assets/lottie/Pull_ups.json',
+      calculationStrategy: RepBasedBodyweightStrategy(),
+      bodyweightFactor: 0.65,
+    ),
+    const Exercise(
       id: 'sit_ups',
       name: 'Sit-ups',
       category: ExerciseCategory.weightTraining,
@@ -49,15 +43,12 @@ class ExerciseDatabase {
       // คิดเป็นประมาณ 20% ของน้ำหนักตัว
       bodyweightFactor: 0.20,
     ),
-
-    // เพิ่มใหม่ - Weight Training
     const Exercise(
-      id: 'lunges',
-      name: 'Lunges',
+      id: 'Lunge',
+      name: 'Lunge',
       category: ExerciseCategory.weightTraining,
-      lottieAssetPath: 'assets/lottie/lunges.json',
-      calculationStrategy: RepBasedBodyweightStrategy(),
-      bodyweightFactor: 0.40,
+      lottieAssetPath: 'assets/lottie/Lunge.json',
+      calculationStrategy: RepBasedWeightedStrategy(),
     ),
     const Exercise(
       id: 'shoulder_press',
@@ -84,40 +75,29 @@ class ExerciseDatabase {
 
     // --- Cardio ---
     const Exercise(
+      id: 'Split_Jump',
+      name: 'Split Jump',
+      category: ExerciseCategory.cardio,
+      lottieAssetPath: 'assets/lottie/Split_Jump.json',
+      calculationStrategy: MetBasedStrategy(),
+      metValue: 8.0,
+    ),
+    const Exercise(
       id: 'jumping_jacks',
       name: 'Jumping Jacks',
       category: ExerciseCategory.cardio,
-      lottieAssetPath: 'assets/lottie/jumping_jacks.json',
+      lottieAssetPath: 'assets/lottie/Jumping_jacks.json',
       calculationStrategy: MetBasedStrategy(),
       metValue: 8.0,
     ),
     const Exercise(
-      id: 'high_knees',
-      name: 'High Knees',
+      id: 'Jumping_squat',
+      name: 'Jumping squat',
       category: ExerciseCategory.cardio,
-      lottieAssetPath: 'assets/lottie/high_knees.json',
-      calculationStrategy: MetBasedStrategy(),
-      metValue: 8.0,
-    ),
-    const Exercise(
-      id: 'burpees',
-      name: 'Burpees',
-      category: ExerciseCategory.cardio,
-      lottieAssetPath: 'assets/lottie/burpees.json',
+      lottieAssetPath: 'assets/lottie/Jumping_squat.json',
       calculationStrategy: MetBasedStrategy(),
       metValue: 9.0,
     ),
-
-    // เพิ่มใหม่ - Cardio
-    const Exercise(
-      id: 'mountain_climbers',
-      name: 'Mountain Climbers',
-      category: ExerciseCategory.cardio,
-      lottieAssetPath: 'assets/lottie/mountain_climbers.json',
-      calculationStrategy: MetBasedStrategy(),
-      metValue: 8.0,
-    ),
-    
     const Exercise(
       id: 'jump_rope',
       name: 'Jump Rope',
@@ -126,12 +106,12 @@ class ExerciseDatabase {
       calculationStrategy: MetBasedStrategy(),
       metValue: 11.0,
     ),
-  
+
     const Exercise(
       id: 'burpees',
       name: 'Burpees',
       category: ExerciseCategory.cardio,
-      lottieAssetPath: 'assets/lottie/dumbbell_press.json',
+      lottieAssetPath: 'assets/lottie/Burpees.json',
       calculationStrategy: MetBasedStrategy(), // ใช้ค่า MET
       metValue: 9.0, // Burpees มีความเข้มข้นสูงกว่า
     ),

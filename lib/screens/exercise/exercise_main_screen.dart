@@ -33,7 +33,7 @@ class ExerciseMainScreen extends StatelessWidget {
             _buildExerciseCard(
               context,
               icon: Icons.directions_run,
-              title: 'คำนวนแคลอรี่จากการวิ่ง / ปั่นจักรยาน',
+              title: 'คำนวนแคลอรี่จากการวิ่ง',
               onTap: () {
                 Navigator.push(
                   context,
@@ -50,7 +50,7 @@ class ExerciseMainScreen extends StatelessWidget {
             _buildExerciseCard(
               context,
               icon: Icons.fitness_center,
-              title: 'เวทเทรนนิ่ง / ยิม',
+              title: 'เวทเทรนนิ่ง',
               onTap: () {
                 Navigator.push(
                   context,
@@ -71,7 +71,7 @@ class ExerciseMainScreen extends StatelessWidget {
             _buildExerciseCard(
               context,
               icon: Icons.favorite_border,
-              title: 'คาร์ดิโอ / กีฬา',
+              title: 'คาร์ดิโอ',
               onTap: () {
                 Navigator.push(
                   context,

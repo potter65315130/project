@@ -293,7 +293,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
     ];
   }
 
-  /// **ฟอร์มใหม่:** สำหรับ Bodyweight (ไม่มีช่องกรอกน้ำหนัก)
+  /// ฟอร์มสำหรับ Bodyweight (ไม่มีช่องกรอกน้ำหนัก)
   List<Widget> _buildBodyweightFields() {
     return [
       Text(

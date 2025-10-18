@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:health_mate/screens/activity_tracking_screen.dart';
+import 'package:health_mate/screens/exercise/exercise_main_screen.dart';
 import 'package:health_mate/screens/food_category/food_logging_screen.dart';
 import 'package:health_mate/screens/login_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -53,7 +54,7 @@ class HomeScreen extends StatelessWidget {
   void _navigateToBurnCalories(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ActivityTrackingScreen()),
+      MaterialPageRoute(builder: (context) => ExerciseMainScreen()),
     );
   }
 
