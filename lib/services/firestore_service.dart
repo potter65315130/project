@@ -379,8 +379,26 @@ class FirestoreService {
             .collection('runningSessions')
             .doc(); // Auto ID
 
-    await runRef.set(session.toFirestore());
+    await runRef.set(
+      session.toFirestore(),
+    ); // ตอนนี้ session.toFirestore() จะมี uid ด้วย
     await burnCalories(uid, session.caloriesBurned); // อัปเดตแคลอรี่ด้วย
+  }
+
+  /// -------------------- ดึงข้อมูลประวัติการวิ่ง (Stream) --------------------
+  /// (ฟังก์ชันใหม่ที่เพิ่มเข้ามา)
+  Stream<List<RunningSessionModel>> getRunningHistoryStream(String uid) {
+    return _firestore
+        .collectionGroup('runningSessions') // ค้นหาใน Collection Group
+        .where('uid', isEqualTo: uid) // กรองหาเฉพาะ uid ของ user คนนี้
+        .orderBy('timestamp', descending: true) // เรียงจากใหม่ไปเก่า
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => RunningSessionModel.fromFirestore(doc))
+                  .toList(),
+        );
   }
 
   /// -------------------- ดึงข้อมูลการกินและวิ่งย้อนหลัง --------------------

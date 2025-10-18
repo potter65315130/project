@@ -22,6 +22,15 @@ class HomeProvider with ChangeNotifier {
   DailyQuestModel? get quest => _quest;
   bool get isLoading => _isLoading;
 
+  // --- เพิ่ม Stream สำหรับประวัติการวิ่ง ---
+  Stream<List<RunningSessionModel>> get runningHistoryStream {
+    if (_currentUserId == null) {
+      return Stream.value([]); // คืนค่า Stream ว่าง ถ้าไม่มี user
+    }
+    return _firestoreService.getRunningHistoryStream(_currentUserId!);
+  }
+  // ------------------------------------
+
   HomeProvider() {
     loadData();
     // ฟัง auth state changes
@@ -200,7 +209,20 @@ class HomeProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await _firestoreService.logRunningSession(uid, session);
+      // --- แก้ไขตรงนี้: สร้าง session ใหม่โดยเพิ่ม uid ---
+      final sessionWithUid = RunningSessionModel(
+        uid: uid,
+        distance: session.distance,
+        durationSeconds: session.durationSeconds,
+        caloriesBurned: session.caloriesBurned,
+        timestamp: session.timestamp,
+      );
+      // -------------------------------------------
+
+      await _firestoreService.logRunningSession(
+        uid,
+        sessionWithUid,
+      ); // ส่ง session ที่มี uid ไป
       await loadData();
     } catch (e) {
       if (kDebugMode) print('Error logging activity in Provider: $e');

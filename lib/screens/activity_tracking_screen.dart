@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:health_mate/models/running_session_model.dart';
 import 'package:health_mate/providers/home_provider.dart';
+import 'package:health_mate/screens/history/running_history_screen.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -31,8 +32,8 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   double _distance = 0.0;
   Duration _duration = Duration.zero;
   double _caloriesBurned = 0.0;
-  double _currentSpeed = 0.0; // km/h
-  double _avgSpeed = 0.0; // km/h
+  double _currentSpeed = 0.0;
+  double _avgSpeed = 0.0;
 
   @override
   void initState() {
@@ -88,7 +89,7 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
 
   void _startCountdown() {
     if (_currentPosition == null) {
-      _showErrorDialog('ยังไม่พบตำแหน่งปัจจุบัน โปรดรอสักครู่');
+      _showErrorDialog('ยังไม่พบตำแหน่งปัจจุบัน โปรดรออักครั้ง');
       return;
     }
 
@@ -124,12 +125,10 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       );
     });
 
-    // Timer สำหรับนับเวลา
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted && _state == TrackingState.running) {
         setState(() {
           _duration += const Duration(seconds: 1);
-          // คำนวณความเร็วเฉลี่ย
           if (_duration.inSeconds > 0) {
             _avgSpeed = (_distance / 1000) / (_duration.inSeconds / 3600);
           }
@@ -137,11 +136,10 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       }
     });
 
-    // Stream สำหรับติดตามตำแหน่ง - ลด distanceFilter เพื่อความแม่นยำมากขึ้น
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 2, // ลดจาก 5 เป็น 2 เมตร
+        accuracy: LocationAccuracy.bestForNavigation,
+        distanceFilter: 0,
       ),
     ).listen((Position position) {
       if (mounted && _state == TrackingState.running) {
@@ -160,7 +158,6 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
             );
             _distance += addedDistance;
 
-            // คำนวณความเร็วปัจจุบัน (m/s -> km/h)
             if (position.speed > 0) {
               _currentSpeed = position.speed * 3.6;
             }
@@ -242,11 +239,33 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       barrierDismissible: false,
       builder:
           (context) => AlertDialog(
-            title: const Row(
+            backgroundColor: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 28),
-                SizedBox(width: 8),
-                Text('สรุปการวิ่ง'),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCDFF00),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: Color(0xFF1A1A1A),
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'สรุปการวิ่ง',
+                  style: TextStyle(
+                    color: Color(0xFFCDFF00),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
               ],
             ),
             content: SingleChildScrollView(
@@ -259,25 +278,25 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                     'ระยะทาง',
                     '${(_distance / 1000).toStringAsFixed(2)} กม.',
                   ),
-                  const Divider(),
+                  const Divider(color: Color(0xFF333333)),
                   _buildSummaryRow(
                     Icons.timer,
                     'เวลา',
                     _formatDuration(_duration),
                   ),
-                  const Divider(),
+                  const Divider(color: Color(0xFF333333)),
                   _buildSummaryRow(
                     Icons.speed,
                     'ความเร็วเฉลี่ย',
                     '${_avgSpeed.toStringAsFixed(1)} กม./ชม.',
                   ),
-                  const Divider(),
+                  const Divider(color: Color(0xFF333333)),
                   _buildSummaryRow(
                     Icons.trending_up,
                     'Pace',
                     '${pace.toStringAsFixed(1)} นาที/กม.',
                   ),
-                  const Divider(),
+                  const Divider(color: Color(0xFF333333)),
                   _buildSummaryRow(
                     Icons.local_fire_department,
                     'เผาผลาญ',
@@ -292,7 +311,10 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                   Navigator.of(context).pop();
                   _resetTracking();
                 },
-                child: const Text('ยกเลิก'),
+                child: const Text(
+                  'ยกเลิก',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
               ),
               ElevatedButton.icon(
                 onPressed: () async {
@@ -304,15 +326,19 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                   );
                   await context.read<HomeProvider>().logActivity(session);
                   if (mounted) {
-                    Navigator.of(context).pop(); // ปิด Dialog
-                    Navigator.of(context).pop(); // กลับหน้า Home
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
                   }
                 },
-                icon: const Icon(Icons.save),
-                label: const Text('บันทึก'),
+                icon: const Icon(Icons.save, size: 20),
+                label: const Text('บันทึก', style: TextStyle(fontSize: 16)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFFCDFF00),
+                  foregroundColor: const Color(0xFF1A1A1A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
                 ),
               ),
             ],
@@ -322,15 +348,26 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
 
   Widget _buildSummaryRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Icon(icon, size: 24, color: Colors.blue),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFCDFF00),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 20, color: const Color(0xFF1A1A1A)),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Colors.white70,
+              ),
             ),
           ),
           Text(
@@ -338,7 +375,7 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Color(0xFFCDFF00),
             ),
           ),
         ],
@@ -351,12 +388,28 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       context: context,
       builder:
           (_) => AlertDialog(
-            title: const Text("กรุณาเปิด GPS"),
-            content: const Text("แอปนี้ต้องใช้ GPS ในการติดตามกิจกรรมของคุณ"),
+            backgroundColor: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              "เปิด GPS",
+              style: TextStyle(
+                color: Color(0xFFCDFF00),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              "แอปนี้ต้องใช้ GPS ในการติดตามการวิ่งของคุณ",
+              style: TextStyle(color: Colors.white70),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("ตกลง"),
+                child: const Text(
+                  "ตกลง",
+                  style: TextStyle(color: Color(0xFFCDFF00)),
+                ),
               ),
             ],
           ),
@@ -368,12 +421,28 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       context: context,
       builder:
           (_) => AlertDialog(
-            title: const Text("การอนุญาตถูกปฏิเสธ"),
-            content: const Text("แอปต้องการสิทธิ์การเข้าถึงตำแหน่งเพื่อทำงาน"),
+            backgroundColor: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              "การอนุญาตถูกปฏิเสธ",
+              style: TextStyle(
+                color: Color(0xFFCDFF00),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              "แอปต้องการสิทธิ์การเข้าถึงตำแหน่งเพื่อทำงาน",
+              style: TextStyle(color: Colors.white70),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("ตกลง"),
+                child: const Text(
+                  "ตกลง",
+                  style: TextStyle(color: Color(0xFFCDFF00)),
+                ),
               ),
             ],
           ),
@@ -385,19 +454,38 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
       context: context,
       builder:
           (_) => AlertDialog(
-            title: const Text("สิทธิ์ถูกปฏิเสธถาวร"),
-            content: const Text("กรุณาเปิดสิทธิ์จากหน้าตั้งค่าของระบบ"),
+            backgroundColor: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              "สิทธิ์ถูกปฏิเสธอย่างถาวร",
+              style: TextStyle(
+                color: Color(0xFFCDFF00),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              "กรุณาเปิดสิทธิ์จากหน้าต้นของระบบ",
+              style: TextStyle(color: Colors.white70),
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Geolocator.openAppSettings();
                   Navigator.pop(context);
                 },
-                child: const Text("ไปยังการตั้งค่า"),
+                child: const Text(
+                  "ไปยังการตั้งค่า",
+                  style: TextStyle(color: Color(0xFFCDFF00)),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("ยกเลิก"),
+                child: const Text(
+                  "ยกเลิก",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
             ],
           ),
@@ -410,12 +498,28 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('เกิดข้อผิดพลาด'),
-              content: Text(message),
+              backgroundColor: const Color(0xFF1A1A1A),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                'เกิดข้อผิดพลาด',
+                style: TextStyle(
+                  color: Color(0xFFCDFF00),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Text(
+                message,
+                style: const TextStyle(color: Colors.white70),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('ตกลง'),
+                  child: const Text(
+                    'ตกลง',
+                    style: TextStyle(color: Color(0xFFCDFF00)),
+                  ),
                 ),
               ],
             ),
@@ -443,47 +547,64 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text('ติดตามการวิ่ง'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        title: const Text(
+          'ติดตามการวิ่ง',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        ),
+        backgroundColor: const Color(0xFF1A1A1A),
+        foregroundColor: const Color(0xFFCDFF00),
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'ประวัติการวิ่ง',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RunningHistoryScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // ส่วนแสดงผลข้อมูล
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade50, Colors.white],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+              color: const Color(0xFF262626),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
             ),
             child: Column(
               children: [
-                // แถวแรก: ระยะทาง และ เวลา
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildStatCard(
                       'ระยะทาง',
-                      '${(_distance / 1000).toStringAsFixed(2)}',
+                      (_distance / 1000).toStringAsFixed(2),
                       'กม.',
                       Icons.straighten,
-                      Colors.blue,
+                      const Color(0xFFCDFF00),
                     ),
                     _buildStatCard(
                       'เวลา',
                       _formatDuration(_duration),
                       '',
                       Icons.timer,
-                      Colors.orange,
+                      const Color(0xFFCDFF00),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                // แถวสอง: ความเร็ว และ แคลอรี่
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -492,21 +613,20 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                       _currentSpeed.toStringAsFixed(1),
                       'กม./ชม.',
                       Icons.speed,
-                      Colors.green,
+                      const Color(0xFFCDFF00),
                     ),
                     _buildStatCard(
                       'เผาผลาญ',
                       '${_caloriesBurned.toInt()}',
                       'kcal',
                       Icons.local_fire_department,
-                      Colors.red,
+                      const Color(0xFFCDFF00),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          // ส่วนแผนที่
           Expanded(
             child: Stack(
               children: [
@@ -515,9 +635,19 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(),
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFFCDFF00),
+                            ),
+                          ),
                           SizedBox(height: 16),
-                          Text('กำลังค้นหาตำแหน่ง...'),
+                          Text(
+                            'กำลังค้นหาตำแหน่ง...',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
                         ],
                       ),
                     )
@@ -541,31 +671,42 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                             polylines: [
                               Polyline(
                                 points: _routePoints,
-                                color: Colors.blue,
+                                color: const Color(0xFFCDFF00),
                                 strokeWidth: 6,
                               ),
                             ],
                           ),
                         MarkerLayer(
                           markers: [
-                            // จุดเริ่มต้น
                             if (_routePoints.isNotEmpty)
                               Marker(
                                 point: _routePoints.first,
-                                width: 30,
-                                height: 30,
+                                width: 40,
+                                height: 40,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.green,
+                                    color: const Color(0xFFCDFF00),
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: Colors.white,
                                       width: 3,
                                     ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFFCDFF00,
+                                        ).withOpacity(0.5),
+                                        blurRadius: 8,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.check,
+                                    color: Color(0xFF1A1A1A),
+                                    size: 24,
                                   ),
                                 ),
                               ),
-                            // ตำแหน่งปัจจุบัน
                             Marker(
                               point: LatLng(
                                 _currentPosition!.latitude,
@@ -573,20 +714,34 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                               ),
                               width: 50,
                               height: 50,
-                              child: const Icon(
-                                Icons.navigation,
-                                color: Colors.blue,
-                                size: 40,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFCDFF00),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFFCDFF00,
+                                      ).withOpacity(0.6),
+                                      blurRadius: 12,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.navigation,
+                                  color: Color(0xFF1A1A1A),
+                                  size: 30,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                // Countdown overlay
                 if (_state == TrackingState.countdown)
                   Container(
-                    color: Colors.black54,
+                    color: Colors.black87,
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -596,13 +751,17 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                             style: const TextStyle(
                               fontSize: 120,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Color(0xFFCDFF00),
                             ),
                           ),
                           const SizedBox(height: 20),
                           const Text(
                             'เตรียมพร้อม...',
-                            style: TextStyle(fontSize: 24, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Color(0xFFCDFF00),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -625,20 +784,32 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
     Color color,
   ) {
     return Expanded(
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 28),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
               const SizedBox(height: 8),
               Text(
                 label,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                style: const TextStyle(color: Colors.white60, fontSize: 12),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -646,18 +817,20 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                   Text(
                     value,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   if (unit.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: 2, bottom: 2),
+                      padding: const EdgeInsets.only(left: 3, bottom: 2),
                       child: Text(
                         unit,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white60,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -674,14 +847,10 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        color: const Color(0xFF1A1A1A),
+        border: Border(
+          top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+        ),
       ),
       child: SafeArea(child: _buildButtonsForState()),
     );
@@ -696,13 +865,17 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
           child: ElevatedButton.icon(
             onPressed: _startCountdown,
             icon: const Icon(Icons.play_arrow, size: 28),
-            label: const Text('เริ่มวิ่ง', style: TextStyle(fontSize: 18)),
+            label: const Text(
+              'เริ่มวิ่ง',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFCDFF00),
+              foregroundColor: const Color(0xFF1A1A1A),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
+              elevation: 4,
             ),
           ),
         );
@@ -717,13 +890,17 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
               _resetTracking();
             },
             icon: const Icon(Icons.close, size: 28),
-            label: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
+            label: const Text(
+              'ยกเลิก',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
+              backgroundColor: Colors.grey.shade700,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
+              elevation: 0,
             ),
           ),
         );
@@ -737,13 +914,17 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _pauseTracking,
                   icon: const Icon(Icons.pause, size: 28),
-                  label: const Text('หยุด', style: TextStyle(fontSize: 18)),
+                  label: const Text(
+                    'หยุด',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.orange.shade700,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -757,14 +938,15 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                   icon: const Icon(Icons.stop, size: 28),
                   label: const Text(
                     'เสร็จสิ้น',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.red.shade700,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -783,14 +965,15 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                   icon: const Icon(Icons.play_arrow, size: 28),
                   label: const Text(
                     'ดำเนินต่อ',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFCDFF00),
+                    foregroundColor: const Color(0xFF1A1A1A),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -804,14 +987,15 @@ class _ActivityTrackingScreenState extends State<ActivityTrackingScreen> {
                   icon: const Icon(Icons.stop, size: 28),
                   label: const Text(
                     'เสร็จสิ้น',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.red.shade700,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
