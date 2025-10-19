@@ -16,35 +16,31 @@ class HomeProvider with ChangeNotifier {
   UserModel? _user;
   DailyQuestModel? _quest;
   bool _isLoading = true;
-  String? _currentUserId; // เก็บ ID ของ user ปัจจุบัน
+  String? _currentUserId;
 
   UserModel? get user => _user;
   DailyQuestModel? get quest => _quest;
   bool get isLoading => _isLoading;
 
-  // --- เพิ่ม Stream สำหรับประวัติการวิ่ง ---
   Stream<List<RunningSessionModel>> get runningHistoryStream {
     if (_currentUserId == null) {
-      return Stream.value([]); // คืนค่า Stream ว่าง ถ้าไม่มี user
+      return Stream.value([]);
     }
     return _firestoreService.getRunningHistoryStream(_currentUserId!);
   }
-  // ------------------------------------
 
   HomeProvider() {
     loadData();
-    // ฟัง auth state changes
     _auth.authStateChanges().listen((User? user) {
       final newUserId = user?.uid;
       if (_currentUserId != newUserId) {
         _currentUserId = newUserId;
-        _clearData(); // ล้างข้อมูลเก่า
-        loadData(); // โหลดข้อมูลใหม่
+        _clearData();
+        loadData();
       }
     });
   }
 
-  // ฟังก์ชันล้างข้อมูล
   void _clearData() {
     _user = null;
     _quest = null;
@@ -52,7 +48,6 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // เพิ่มฟังก์ชันสำหรับ refresh ข้อมูลจากภายนอก
   Future<void> refreshData() async {
     _clearData();
     await loadData();
@@ -70,7 +65,6 @@ class HomeProvider with ChangeNotifier {
       return;
     }
 
-    // ตรวจสอบว่า user เปลี่ยนแล้วหรือไม่
     if (_currentUserId != uid) {
       _currentUserId = uid;
       _clearData();
@@ -87,7 +81,6 @@ class HomeProvider with ChangeNotifier {
         return;
       }
 
-      // ตรวจสอบให้แน่ใจว่ามีการสร้าง quest ด้วยข้อมูลล่าสุด
       final quest = await _firestoreService.fetchOrCreateTodayQuest(
         uid,
         user.dailyCalorieTarget,
@@ -209,7 +202,6 @@ class HomeProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      // --- แก้ไขตรงนี้: สร้าง session ใหม่โดยเพิ่ม uid ---
       final sessionWithUid = RunningSessionModel(
         uid: uid,
         distance: session.distance,
@@ -217,12 +209,8 @@ class HomeProvider with ChangeNotifier {
         caloriesBurned: session.caloriesBurned,
         timestamp: session.timestamp,
       );
-      // -------------------------------------------
 
-      await _firestoreService.logRunningSession(
-        uid,
-        sessionWithUid,
-      ); // ส่ง session ที่มี uid ไป
+      await _firestoreService.logRunningSession(uid, sessionWithUid);
       await loadData();
     } catch (e) {
       if (kDebugMode) print('Error logging activity in Provider: $e');
@@ -260,7 +248,6 @@ class HomeProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    // ล้างข้อมูลเมื่อ dispose
     _clearData();
     super.dispose();
   }
