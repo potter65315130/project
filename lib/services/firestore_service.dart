@@ -301,7 +301,7 @@ class FirestoreService {
             .collection('dailyQuests')
             .doc(todayId)
             .collection('foodEntries')
-            .doc(); // Auto ID
+            .doc();
 
     await _firestore.runTransaction((transaction) async {
       final questDocRef = _firestore
@@ -377,21 +377,18 @@ class FirestoreService {
             .collection('dailyQuests')
             .doc(todayId)
             .collection('runningSessions')
-            .doc(); // Auto ID
+            .doc();
 
-    await runRef.set(
-      session.toFirestore(),
-    ); // ตอนนี้ session.toFirestore() จะมี uid ด้วย
-    await burnCalories(uid, session.caloriesBurned); // อัปเดตแคลอรี่ด้วย
+    await runRef.set(session.toFirestore());
+    await burnCalories(uid, session.caloriesBurned);
   }
 
   /// -------------------- ดึงข้อมูลประวัติการวิ่ง (Stream) --------------------
-  /// (ฟังก์ชันใหม่ที่เพิ่มเข้ามา)
   Stream<List<RunningSessionModel>> getRunningHistoryStream(String uid) {
     return _firestore
-        .collectionGroup('runningSessions') // ค้นหาใน Collection Group
-        .where('uid', isEqualTo: uid) // กรองหาเฉพาะ uid ของ user คนนี้
-        .orderBy('timestamp', descending: true) // เรียงจากใหม่ไปเก่า
+        .collectionGroup('runningSessions')
+        .where('uid', isEqualTo: uid)
+        .orderBy('timestamp', descending: true)
         .snapshots()
         .map(
           (snapshot) =>
