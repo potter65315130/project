@@ -4,11 +4,9 @@ import 'package:health_mate/models/food/food_item_model.dart';
 import 'package:health_mate/services/firestore_service.dart';
 import 'package:health_mate/widgets/food_log_dialog.dart';
 
-// --- UI THEME CONSTANTS ---
 const Color _darkBgColor = Color(0xFF121212);
 const Color _lightTextColor = Colors.white;
 const Color _mediumTextColor = Color(0xFFB0B0B0);
-// --- END UI THEME CONSTANTS ---
 
 class FoodItemListScreen extends StatelessWidget {
   final String categoryName;

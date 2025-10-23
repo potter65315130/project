@@ -12,18 +12,14 @@ import 'package:health_mate/providers/home_provider.dart';
 import 'package:health_mate/services/firestore_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-
-// ADDED: import สำหรับหน้าจอและ Dialog ที่สร้างใหม่
 import 'package:health_mate/screens/food_category/barcode_scanner_screen.dart';
 import 'package:health_mate/widgets/food_entry_detail_dialog.dart';
 
-// --- UI THEME CONSTANTS ---
 const Color _darkBgColor = Color(0xFF1A1A1A);
 const Color _darkElementColor = Color(0xFF2A2A2A);
 const Color _accentColor = Color(0xFFB4F82B);
 const Color _lightTextColor = Colors.white;
 const Color _mediumTextColor = Color(0xFFB0B0B0);
-// --- END UI THEME CONSTANTS ---
 
 class FoodLoggingScreen extends StatefulWidget {
   const FoodLoggingScreen({super.key});

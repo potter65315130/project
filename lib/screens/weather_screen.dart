@@ -25,13 +25,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   // ฟังก์ชันแนะนำการออกกำลังกาย
   Map<String, dynamic> getExerciseRecommendation() {
-    if (weatherData == null)
+    if (weatherData == null) {
       return {
         'icon': '🤷‍♂️',
         'title': 'ไม่มีข้อมูล',
         'description': '',
         'color': const Color(0xFF424242),
       };
+    }
 
     double temp = (weatherData!['main']['temp'] as num).toDouble();
     double humidity = (weatherData!['main']['humidity'] as num).toDouble();
@@ -148,13 +149,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           setState(() {
-            errorMessage = "❌ ไม่ได้รับสิทธิ์ใช้ Location";
+            errorMessage = " ไม่ได้รับสิทธิ์ใช้ Location";
             isLoading = false;
           });
           return;
         }
       }
-
       // เอาพิกัด latitude, longitude
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -163,7 +163,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
       final lat = position.latitude;
       final lon = position.longitude;
 
-      // เรียก API OpenWeatherMap
       final url = Uri.parse(
         "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=th",
       );

@@ -28,7 +28,6 @@ abstract class CalorieCalculationStrategy {
 /// Strategy สำหรับการคำนวณแบบ MET (Cardio)
 class MetBasedStrategy extends CalorieCalculationStrategy {
   const MetBasedStrategy();
-
   @override
   double calculate(CalculationParams params) {
     // สูตรมาตรฐาน: (MET * น้ำหนักตัว (kg) * 3.5) / 200 * เวลา (นาที)
@@ -41,7 +40,6 @@ class MetBasedStrategy extends CalorieCalculationStrategy {
 /// Strategy สำหรับ Weight Training แบบใช้น้ำหนัก
 class RepBasedWeightedStrategy extends CalorieCalculationStrategy {
   const RepBasedWeightedStrategy();
-
   @override
   double calculate(CalculationParams params) {
     // สูตรพื้นฐาน: Sets * Reps * Weight (kg) * Factor
@@ -54,7 +52,6 @@ class RepBasedWeightedStrategy extends CalorieCalculationStrategy {
 /// Strategy สำหรับ Weight Training แบบ Bodyweight
 class RepBasedBodyweightStrategy extends CalorieCalculationStrategy {
   const RepBasedBodyweightStrategy();
-
   @override
   double calculate(CalculationParams params) {
     // ใช้ bodyweightFactor ที่กำหนดไว้ในแต่ละท่า เพื่อความแม่นยำ

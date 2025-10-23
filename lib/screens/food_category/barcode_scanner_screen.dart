@@ -70,7 +70,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       ),
       body: Stack(
         children: [
-          // Scanner View
           MobileScanner(
             controller: controller,
             onDetect: (capture) {
@@ -82,7 +81,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             },
           ),
 
-          // Overlay with scanning area
           ColorFiltered(
             colorFilter: ColorFilter.mode(
               Colors.black.withOpacity(0.5),
@@ -110,7 +108,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             ),
           ),
 
-          // Scanning frame with corners
           Center(
             child: Container(
               height: 250,
@@ -120,7 +117,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               ),
               child: Stack(
                 children: [
-                  // Top-left corner
                   Positioned(
                     top: 0,
                     left: 0,
@@ -138,7 +134,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       ),
                     ),
                   ),
-                  // Top-right corner
                   Positioned(
                     top: 0,
                     right: 0,
@@ -156,7 +151,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       ),
                     ),
                   ),
-                  // Bottom-left corner
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -177,7 +171,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       ),
                     ),
                   ),
-                  // Bottom-right corner
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -198,7 +191,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       ),
                     ),
                   ),
-                  // Animated scanning line
                   AnimatedBuilder(
                     animation: _animation,
                     builder: (context, child) {
@@ -233,7 +225,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             ),
           ),
 
-          // Instructions text
           Positioned(
             top: MediaQuery.of(context).size.height * 0.25,
             left: 0,
@@ -262,7 +253,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             ),
           ),
 
-          // Bottom controls
           Positioned(
             bottom: 60,
             left: 0,

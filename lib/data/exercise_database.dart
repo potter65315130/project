@@ -1,5 +1,3 @@
-// data/exercise_database.dart
-
 import 'package:health_mate/models/exercise_model.dart';
 import 'package:health_mate/services/calorie_calculation_strategy.dart';
 
