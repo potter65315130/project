@@ -232,7 +232,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
         title: const Text(
-          'Calorie Diary',
+          'หน้าหลัก',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF1A1A1A),

@@ -144,7 +144,10 @@ class _FoodLoggingScreenState extends State<FoodLoggingScreen> {
           elevation: 0,
           title: const Text(
             'บันทึกอาหาร',
-            style: TextStyle(color: _lightTextColor),
+            style: TextStyle(
+              color: _lightTextColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           bottom: const TabBar(
             labelColor: _accentColor,

@@ -11,7 +11,7 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  final String apiKey = '45d46ce30f18652988cfaf26b76687ce';
+  final String apiKey = '914ab84766cca6dfcc374f5eadf728ff';
 
   Map<String, dynamic>? weatherData;
   bool isLoading = true;
@@ -194,7 +194,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     final recommendation = getExerciseRecommendation();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1C), // Dark background
+      backgroundColor: const Color(0xFF1C1C1C),
       appBar: AppBar(
         title: const Text(
           "สภาพอากาศวันนี้ ",
